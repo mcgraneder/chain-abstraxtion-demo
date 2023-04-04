@@ -9,10 +9,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "^13.2.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "zod": "^3.21.4",
     "@1inch/multicall": "^1.0.7",
     "@headlessui/react": "^1.7.7",
     "@iconscout/react-unicons": "^1.1.6",
@@ -26,9 +22,12 @@
     "bignumber.js": "^9.1.1",
     "dayjs": "^1.11.7",
     "ethers": "^5.7.2",
+    "next": "^13.2.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "styled-components": "^5.3.6",
-    "web3": "1.7.4"
-
+    "web3": "1.7.4",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/eslint": "^8.21.3",
@@ -36,9 +35,11 @@
     "@types/prettier": "^2.7.2",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "autoprefixer": "^10.4.14",
+    "babel-plugin-styled-components": "1.13.3",
     "eslint": "^8.36.0",
     "eslint-config-next": "^13.2.4",
     "postcss": "^8.4.21",

@@ -1,6 +1,6 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
+import defaultTheme from "tailwindcss/defaultTheme";
 
-module.exports = {
+const tailwindConfig = {
     content: ['./src/**/*.{js,ts,jsx,tsx}'],
     theme: {
         extend: {
@@ -48,18 +48,6 @@ module.exports = {
             boxShadow: {
                 custom: '0 0px 15px rgba(0, 0, 0, 0.01)'
             },
-
-            backgroundImage: {
-                // 'section4-part1':
-                //     'radial-gradient(555.04% 280.25% at 0% 0%, theme("colors.black-700") 31.88%, theme("colors.primary") 100%)',
-                // 'section4-part2':
-                //     'radial-gradient(555.04% 280.25% at 100% 0%, theme("colors.black-700") 31.88%, theme("colors.primary") 100%)',
-                'section4-part3-web': 'url("/svgs/section4-part3-web.svg")',
-                'section4-part3-tablet':
-                    'radial-gradient(100.69% 1520.93% at 50% 50%, #00000000 44.73%, theme("colors.darkBackground") 100%), url("/svgs/section4-part3-tablet.svg")',
-                'section4-part3-mobile':
-                    'radial-gradient(100.69% 1520.93% at 50% 50%, #00000000 44.73%, theme("colors.darkBackground") 100%), url("/svgs/section4-part3-mobile.svg")'
-            },
             screens: {
                 sm2: '600px',
                 md2: '760px',
@@ -76,3 +64,5 @@ module.exports = {
     safelist: ['bg-warning', 'bg-error', 'text-warning', 'text-error'],
     plugins: []
 };
+
+export default tailwindConfig

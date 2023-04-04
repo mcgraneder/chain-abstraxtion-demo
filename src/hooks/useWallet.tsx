@@ -116,7 +116,7 @@ function useWallet() {
   const activateWallet = useCallback(
     (wallet: AbstractConnector, manualLogin: boolean) => {
       if (wallet == undefined) return;
-      activate(wallet).catch((err: ProviderRpcError) => {
+      activate(wallet, undefined, true).catch((err: ProviderRpcError) => {
        if (
           err instanceof UserRejectedRequestErrorInjected ||
           err instanceof UserRejectedRequestErrorWalletConnect
