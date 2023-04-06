@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { injected, walletconnect } from "../connection/providers";
 import {
@@ -36,6 +32,12 @@ interface ProviderRpcError extends Error {
 }
 
 function useWallet() {
+  const [error, setWalletError] = useState<string | undefined>(undefined);
+  const [connecting, setConnecting] = useState<boolean>(false);
+  const [pendingWallet, setPendingWallet] = useState<
+    AbstractConnector | undefined
+  >();
+
   const {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     library,
@@ -46,59 +48,7 @@ function useWallet() {
     account,
   } = useWeb3React();
 
-  const [error, setWalletError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>(
-    ERROR_MESSSAGES["USER_REJECTED"] as string
-  );
-  const [openWalletModal, setOpenWalletModal] = useState<boolean>(false);
-  const [connecting, setConnecting] = useState<boolean>(false);
-  const [pendingWallet, setPendingWallet] = useState<
-    AbstractConnector | undefined
-  >();
-  const [pendingChain, setPendingChain] = useState<number | undefined>(
-    undefined
-  );
-  const [hasSigned, setHasSigned] = useState<boolean>(true);
-  const [activeSession, setActiveSession] = useState<boolean>(false);
-
-  const toggleErrorModal = useCallback(
-    () => setWalletError(false),
-    [setWalletError]
-  );
-  const toggleConecting = useCallback(
-    () => setConnecting((c) => !c),
-    [setConnecting]
-  );
-  const toggleWalletModal = useCallback(
-    () => setOpenWalletModal((w) => !w),
-    [setOpenWalletModal]
-  );
-
-  useEffect(() => {
-    if (active && errorMessage == ERROR_MESSSAGES["NETWORK_SWITCH"])
-      setWalletError(false);
-    if (error) setConnecting(false);
-    if (typeof window !== undefined) {
-      if (
-        activeSession &&
-        account &&
-        active &&
-        localStorage.getItem("authToken")
-      )
-        setHasSigned(false);
-    }
-  }, [active, error, account, activeSession, errorMessage]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setConnecting(false);
-    }, 1000);
-  }, [connected]);
-
-  useEffect(() => {
-    setTimeout(() => setActiveSession(true), 4000);
-  }, []);
-
+  //mapping
   const getConnector = (provider: string): AbstractConnector => {
     let connector: AbstractConnector | null;
     if (provider === "injected") connector = injected;
@@ -114,29 +64,22 @@ function useWallet() {
   }, [deactivate]);
 
   const activateWallet = useCallback(
-    (wallet: AbstractConnector, manualLogin: boolean) => {
+    (wallet: AbstractConnector) => {
       if (wallet == undefined) return;
       activate(wallet, undefined, true).catch((err: ProviderRpcError) => {
-       if (
+        if (
           err instanceof UserRejectedRequestErrorInjected ||
           err instanceof UserRejectedRequestErrorWalletConnect
         ) {
-          setWalletError(true);
-          setErrorMessage(ERROR_MESSSAGES["USER_REJECTED"]!);
+          setWalletError(ERROR_MESSSAGES["USER_REJECTED"]);
         } else if (err instanceof NoEthereumProviderError) {
-          setWalletError(true);
-          setErrorMessage(ERROR_MESSSAGES["NO_PROVIDER"]!);
+          setWalletError(ERROR_MESSSAGES["USER_REJECTED"]);
         } else if (err.code == -32002) {
-          setWalletError(true);
-          setErrorMessage(ERROR_MESSSAGES["REQUEST_PENDING"]!);
+          setWalletError(ERROR_MESSSAGES["USER_REJECTED"]);
         } else {
-          setWalletError(true);
-          setErrorMessage(ERROR_MESSSAGES["UNKNOWN"]!);
+          setWalletError(ERROR_MESSSAGES["USER_REJECTED"]);
         }
-        setHasSigned(true);
-      })
-       
-      if (manualLogin) setHasSigned(false);
+      });
     },
     [activate]
   );
@@ -144,37 +87,19 @@ function useWallet() {
   const connectOnLoad = useCallback(
     (WalletConnector: AbstractConnector) => {
       if (WalletConnector === injected) {
-        activateWallet(WalletConnector, false);
+        activateWallet(WalletConnector);
       } else {
         setTimeout(() => {
-          activateWallet(WalletConnector, false);
+          activateWallet(WalletConnector);
         }, 2000);
       }
     },
     [activateWallet]
   ); //run once on page load
 
-  const reset = (): void => {
-    setOpenWalletModal(false);
-    setConnecting(false);
-    setWalletError(false);
-  };
-
-  //run only once on mount solves bug from our call.
-  //if curious ask me and ill explain
-  useEffect(() => {
-    if (typeof window == "undefined") return;
-    const provider = localStorage.getItem("provider");
-
-    const WalletConnector = getConnector(provider!);
-    if (!library && provider && WalletConnector) {
-      connectOnLoad(WalletConnector);
-    }
-  }, []);
-
   function connectOn(wallet: WalletInfo) {
+    activateWallet(wallet.connector);
     localStorage.setItem("provider", wallet.provider);
-    activateWallet(wallet.connector, true);
   }
 
   const _switchNetwork = useCallback(
@@ -190,9 +115,9 @@ function useWallet() {
           method: "wallet_switchEthereumChain",
           params: [{ chainId: hexChainId }],
         });
-        setWalletError(false);
+        setWalletError(undefined);
       } catch (error) {
-        const typedError = error as ProviderRpcError
+        const typedError = error as ProviderRpcError;
         if (typedError.code === 4902) {
           // TODO: get new chain params
           try {
@@ -212,23 +137,20 @@ function useWallet() {
                 },
               ],
             });
-            setWalletError(false);
+            setWalletError(undefined);
           } catch (addError) {
             const typedError = addError as ProviderRpcError;
-            // handle "add" error
             setConnecting(false);
-
             return { switched: false, errorCode: typedError.code };
           }
         } else if (typedError.code == -32002) {
-          setWalletError(true);
-          setErrorMessage(ERROR_MESSSAGES["REQUEST_PENDING"]!);
+          setWalletError(ERROR_MESSSAGES["REQUEST_PENDING"]);
         }
 
         return { switched: false, errorCode: typedError.code };
       }
     },
-    [setWalletError, setErrorMessage]
+    [setWalletError]
   );
 
   const needToSwitchChain = (id: number): boolean => {
@@ -243,28 +165,47 @@ function useWallet() {
     return result;
   };
 
+  //run only once on mount solves bug from our call.
+  //if curious ask me and ill explain
+  useEffect(() => {
+    if (typeof window == "undefined") return;
+    const provider = localStorage.getItem("provider");
+    if (!library && provider) {
+      const WalletConnector = getConnector(provider);
+      connectOnLoad(WalletConnector);
+    }
+  }, []);
+
+  //look into making this cleaner
+  useEffect(() => {
+    if (error) setConnecting(false);
+  }, [active, error, account]);
+
+  useEffect(() => {
+    const timeout: NodeJS.Timeout = setTimeout(() => {
+      setConnecting(false);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [connected]);
+
   return {
     disconnect,
     connectOn,
     error,
     setWalletError,
-    openWalletModal,
-    setOpenWalletModal,
     connecting,
     setConnecting,
     pendingWallet,
     setPendingWallet,
-    toggleErrorModal,
-    toggleConecting,
-    toggleWalletModal,
-    reset,
-    errorMessage,
     needToSwitchChain,
     switchNetwork,
-    hasSigned,
-    setHasSigned,
   };
 }
 
-
 export default useWallet;
+
+  // const reset = useCallback((): void => {
+  //   setOpenWalletModal(false);
+  //   setConnecting(false);
+  //   setWalletError(undefined);
+  // }, []);
