@@ -1,17 +1,30 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar/Navbar";
+import WalletConnect from "@/components/WalletConnectModal/WalletConnectModal";
+import useWallet from "@/hooks/useWallet";
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
 }
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
+  const wallet = useWallet()
+  // useEffect(() => console.log(openWalletModal), [openWalletModal]);
+   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false);
 
+     const toggleWalletModal = useCallback(
+       () => setOpenWalletModal((w) => !w),
+       [setOpenWalletModal]
+     );
   return (
     <div className="flex h-screen flex-col items-center text-white  lg:h-auto lg:min-h-screen">
       <Navbar
-        toggleWalletModal={() => {return null}}
-        toggleAccoundDetailsModal={() => {return null}}
+        toggleWalletModal={toggleWalletModal}
+        toggleAccoundDetailsModal={toggleWalletModal}
+      />
+      <WalletConnect
+        toggleWalletModal={toggleWalletModal}
+        openWalletModal={openWalletModal}
       />
 
       <div

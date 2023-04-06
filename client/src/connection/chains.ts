@@ -63,26 +63,26 @@ export enum SupportedChainId {
   AVALANCHE_TESTNET = 43113,
 }
 
-export const ChainIdToRenChain: { [chainId: number]: Chain } = {
-  [SupportedChainId.MAINNET]: Chain.Ethereum,
-  [SupportedChainId.GOERLI]: Chain.Ethereum,
-  [SupportedChainId.POLYGON]: Chain.Polygon,
-  [SupportedChainId.POLYGON_MUMBAI]: Chain.Polygon,
-  [SupportedChainId.POLYGON_MUMBAI]: Chain.Polygon,
-  [SupportedChainId.ARBITRUM_ONE]: Chain.Arbitrum,
-  [SupportedChainId.ARBITRUM_RINKEBY]: Chain.Arbitrum,
-  [SupportedChainId.OPTIMISM]: Chain.Optimism,
-  [SupportedChainId.OPTIMISM_GOERLI]: Chain.Optimism,
-  [SupportedChainId.FANTOM_OPERA]: Chain.Fantom,
-  [SupportedChainId.FANTOM_TESTNET]: Chain.Fantom,
-  [SupportedChainId.BINANCE_SMART_CHAIN]: Chain.BinanceSmartChain,
-  [SupportedChainId.BINANCE_SMART_CHAIN_TESTNET]: Chain.BinanceSmartChain,
-  [SupportedChainId.KAVA]: Chain.Kava,
-  [SupportedChainId.KAVA_TESTNET]: Chain.Kava,
-  [SupportedChainId.MOONBEAM]: Chain.Moonbeam,
-  [SupportedChainId.MOONBEAM_TESTNET]: Chain.Moonbeam,
-  [SupportedChainId.AVALANCHE_TESTNET]: Chain.Avalanche,
-};
+// export const ChainIdToRenChain: { [chainId: number]: Chain } = {
+//   [SupportedChainId.MAINNET]: Chain.Ethereum,
+//   [SupportedChainId.GOERLI]: Chain.Ethereum,
+//   [SupportedChainId.POLYGON]: Chain.Polygon,
+//   [SupportedChainId.POLYGON_MUMBAI]: Chain.Polygon,
+//   [SupportedChainId.POLYGON_MUMBAI]: Chain.Polygon,
+//   [SupportedChainId.ARBITRUM_ONE]: Chain.Arbitrum,
+//   [SupportedChainId.ARBITRUM_RINKEBY]: Chain.Arbitrum,
+//   [SupportedChainId.OPTIMISM]: Chain.Optimism,
+//   [SupportedChainId.OPTIMISM_GOERLI]: Chain.Optimism,
+//   [SupportedChainId.FANTOM_OPERA]: Chain.Fantom,
+//   [SupportedChainId.FANTOM_TESTNET]: Chain.Fantom,
+//   [SupportedChainId.BINANCE_SMART_CHAIN]: Chain.BinanceSmartChain,
+//   [SupportedChainId.BINANCE_SMART_CHAIN_TESTNET]: Chain.BinanceSmartChain,
+//   [SupportedChainId.KAVA]: Chain.Kava,
+//   [SupportedChainId.KAVA_TESTNET]: Chain.Kava,
+//   [SupportedChainId.MOONBEAM]: Chain.Moonbeam,
+//   [SupportedChainId.MOONBEAM_TESTNET]: Chain.Moonbeam,
+//   [SupportedChainId.AVALANCHE_TESTNET]: Chain.Avalanche,
+// };
 
 export const CHAINS: { [key: number]: ChainType } = {
   [SupportedChainId.MAINNET]: {

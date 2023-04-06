@@ -32,12 +32,6 @@ interface ProviderRpcError extends Error {
 }
 
 function useWallet() {
-  const [error, setWalletError] = useState<string | undefined>(undefined);
-  const [connecting, setConnecting] = useState<boolean>(false);
-  const [pendingWallet, setPendingWallet] = useState<
-    AbstractConnector | undefined
-  >();
-
   const {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     library,
@@ -48,7 +42,38 @@ function useWallet() {
     account,
   } = useWeb3React();
 
-  //mapping
+  const [error, setWalletError] = useState<string | undefined>(undefined);
+  // const [openWalletModal, setOpenWalletModal] = useState<boolean>(false);
+  const [connecting, setConnecting] = useState<boolean>(false);
+  const [pendingWallet, setPendingWallet] = useState<
+    AbstractConnector | undefined
+  >();
+  const [pendingChain, setPendingChain] = useState<number | undefined>(
+    undefined
+  );
+
+  const toggleErrorModal = useCallback(
+    () => setWalletError(undefined),
+    [setWalletError]
+  );
+  const toggleConecting = useCallback(
+    () => setConnecting((c) => !c),
+    [setConnecting]
+  );
+
+
+  //look into making this cleaner
+  useEffect(() => {
+    if (error) setConnecting(false);
+  }, [active, error, account]);
+
+  useEffect(() => {
+    const timeout: NodeJS.Timeout = setTimeout(() => {
+      setConnecting(false);
+    }, 1000);
+    return () => clearTimeout(timeout)
+  }, [connected]);
+
   const getConnector = (provider: string): AbstractConnector => {
     let connector: AbstractConnector | null;
     if (provider === "injected") connector = injected;
@@ -67,6 +92,7 @@ function useWallet() {
     (wallet: AbstractConnector) => {
       if (wallet == undefined) return;
       activate(wallet, undefined, true).catch((err: ProviderRpcError) => {
+        console.log(err)
         if (
           err instanceof UserRejectedRequestErrorInjected ||
           err instanceof UserRejectedRequestErrorWalletConnect
@@ -96,6 +122,23 @@ function useWallet() {
     },
     [activateWallet]
   ); //run once on page load
+
+  // const reset = useCallback((): void => {
+  //   setOpenWalletModal(false);
+  //   setConnecting(false);
+  //   setWalletError(undefined);
+  // }, []);
+
+  //run only once on mount solves bug from our call.
+  //if curious ask me and ill explain
+  useEffect(() => {
+    if (typeof window == "undefined") return;
+    const provider = localStorage.getItem("provider");
+    if (!library && provider) {
+      const WalletConnector = getConnector(provider);
+      connectOnLoad(WalletConnector);
+    }
+  }, []);
 
   function connectOn(wallet: WalletInfo) {
     activateWallet(wallet.connector);
@@ -140,7 +183,9 @@ function useWallet() {
             setWalletError(undefined);
           } catch (addError) {
             const typedError = addError as ProviderRpcError;
+            // handle "add" error
             setConnecting(false);
+
             return { switched: false, errorCode: typedError.code };
           }
         } else if (typedError.code == -32002) {
@@ -165,29 +210,6 @@ function useWallet() {
     return result;
   };
 
-  //run only once on mount solves bug from our call.
-  //if curious ask me and ill explain
-  useEffect(() => {
-    if (typeof window == "undefined") return;
-    const provider = localStorage.getItem("provider");
-    if (!library && provider) {
-      const WalletConnector = getConnector(provider);
-      connectOnLoad(WalletConnector);
-    }
-  }, []);
-
-  //look into making this cleaner
-  useEffect(() => {
-    if (error) setConnecting(false);
-  }, [active, error, account]);
-
-  useEffect(() => {
-    const timeout: NodeJS.Timeout = setTimeout(() => {
-      setConnecting(false);
-    }, 1000);
-    return () => clearTimeout(timeout);
-  }, [connected]);
-
   return {
     disconnect,
     connectOn,
@@ -197,15 +219,11 @@ function useWallet() {
     setConnecting,
     pendingWallet,
     setPendingWallet,
+    toggleErrorModal,
+    toggleConecting,
     needToSwitchChain,
     switchNetwork,
   };
 }
 
 export default useWallet;
-
-  // const reset = useCallback((): void => {
-  //   setOpenWalletModal(false);
-  //   setConnecting(false);
-  //   setWalletError(undefined);
-  // }, []);
