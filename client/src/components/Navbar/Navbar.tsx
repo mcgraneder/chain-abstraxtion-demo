@@ -11,6 +11,7 @@ import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
 import Wallet from "../../../public/svgs/Wallet.svg"
 import AstralLogo from "../../../public/images/logo.svg";
 import { Wrapper, Nav, Box, BoxItemContainer } from "../CSS/Navbar.styles";
+import TokenSelectDropdown from "../ChainSelector/ChainSelector";
 
 interface INavbar {
   toggleWalletModal: () => void;
@@ -96,33 +97,12 @@ export const Navbar = ({
             </div>
           </BoxItemContainer>
           <BoxItemContainer allignment={"flex-end"}>
-            {/* {activePath !== "/home" && (
-              <div className="mr-5 flex h-full items-center">
-                <TokenSelectDropdown />
-              </div>
-            )} */}
-            { account ? (<div className="mr-5 flex  h-full items-center">
-              <PrimaryButton
-                className="relative mt-[2px] border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] bg-blue-500 bg-white py-[4px] hover:bg-blue-600"
-                onClick={ac}
-              >
-                <div className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-black bg-white">
-                  <AssetIcon
-                    chainName={"BinanceSmartChain" as string}
-                    className="h-6 w-6"
-                  />
-                </div>
-                <span className="ml-6 mr-2 hidden font-[900] text-[#280d5f] xs:block">
-                  {"Binance Smart Chain"}
-                </span>
-                <UilAngleDown className={"h-5 w-5 text-[#280d5f] "} />
-              </PrimaryButton>
-            </div>) : null}
+            {account ? <TokenSelectDropdown /> : null}
             <div className="mr-5 flex  h-full items-center">
               <PrimaryButton
                 className={`relative mt-[2px] ${
                   account
-                    ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb]"
+                    ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] hover:bg-[#eeeef1]"
                     : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
                 } py-[4px]`}
                 onClick={ac}

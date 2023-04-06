@@ -28,8 +28,17 @@ const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
             </span>
           </div>
         </div>
-        <div>
-          <div className="h-[1px] w-full bg-[rgb(231,227,235)]"></div>
+        <div className="flex flex-row justify-between gap-2 border-b border-[rgb(231,227,235)]">
+          <div className="flex items-center justify-center border-b-2 border-[#1fc7d4] px-6 py-2 hover:cursor-pointer">
+            <span className="text-[rgb(118,69,217)] font-[800]">Deposit</span>
+          </div>
+          <div className="flex items-center justify-center px-6 py-2 hover:cursor-pointer">
+            <span className="text-[#7a6eaa] font-[800]">Withdraw</span>
+          </div>
+          <div className="flex items-center justify-center px-6 py-2 hover:cursor-pointer">
+            <span className="text-[#7a6eaa] font-[800]">Transfer</span>
+          </div>
+          {/* <div className="h-[1px] w-full bg-[rgb(231,227,235)]"></div> */}
         </div>
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
           <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
@@ -58,7 +67,7 @@ const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
             className={`my-1 flex h-[120px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
               dropDownActive
                 ? "border-4 border-purple-500"
-                : "border-[#eeeaf4] border-4"
+                : "border-4 border-[#eeeaf4]"
             } mb-3`}
             onClick={() => {
               inputRef.current.focus();
