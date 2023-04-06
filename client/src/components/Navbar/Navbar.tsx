@@ -17,7 +17,7 @@ interface INavbar {
   toggleAccoundDetailsModal: () => void;
 }
 
-const ROUTES: string[] = ["bridge", "wallet", "history", "trade"];
+const ROUTES: string[] = ["faucet", "wallet", "trade"];
 
 const NavLinks = ({ routes, activePath }: { routes: string[], activePath: string }) => {
   return (

@@ -32,7 +32,7 @@ import RenWBTCIcon from "../../../../../public/svgs/assets/renwBTC.svg";
 import RenZECIcon from "../../../../../public/svgs/assets/renZEC.svg";
 import RenGLMRIcon from "../../../../../public/svgs/assets/renGLMR.svg";
 import RenKAVAIcon from "../../../../../public/svgs/assets/renKAVA.svg";
-
+import CakeIcon from "../../../../../public/svgs/assets/cake.svg";
 
 
 export const Icons: {
@@ -46,7 +46,7 @@ export const Icons: {
     ArbETH: RenArbETHIcon,
     BADGER: RenBADGERIcon,
     BCH: RenBCHIcon,
-    BNB: RenBNBIcon,
+    WBNB: RenBNBIcon,
     BTC: RenBTCIcon,
     COMP: RenCOMPIcon,
     CRV: RenCRVIcon,
@@ -82,5 +82,6 @@ export const Icons: {
     USDT_Goerli: RenUSDTIcon,
     ASTRAL_USDT: RenUSDTIcon,
     USDC_Goerli: RenUSDCIcon,
-    oETH: RenETHIcon
+    oETH: RenETHIcon,
+    CAKE: CakeIcon
 };

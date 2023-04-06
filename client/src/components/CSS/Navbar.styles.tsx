@@ -20,7 +20,7 @@ export const Wrapper = styled.div<GenericWrapper>`
   justify-content: space-between;
   position: fixed;
   top: 0px;
-  z-index: 100;
+  z-index: 10;
   /* background: rgb(12, 18, 43); */
   background: White;
   border-bottom: 1px solid rgb(231, 227, 235);

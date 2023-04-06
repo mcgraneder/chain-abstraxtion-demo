@@ -2,7 +2,7 @@ import styled from "styled-components"
 
 export const BridgeModalContainer = styled.div`
   border-radius: 24px;
-  max-width: 436px;
+  max-width: 386px;
   width: 100%;
   z-index: 1;
   border: 1px solid rgb(231, 227, 235);

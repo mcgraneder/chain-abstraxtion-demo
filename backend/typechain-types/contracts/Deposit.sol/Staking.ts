@@ -27,6 +27,7 @@ export interface StakingInterface extends utils.Interface {
   functions: {
     "accountBalances(address,bytes32)": FunctionFragment;
     "depositTokens(uint256,bytes32)": FunctionFragment;
+    "depositTokensToForwarder(uint256,bytes32,address)": FunctionFragment;
     "getWhitelistedTokenAddresses(bytes32)": FunctionFragment;
     "isTrustedForwarder(address)": FunctionFragment;
     "whitelistToken(bytes32,address)": FunctionFragment;
@@ -38,6 +39,7 @@ export interface StakingInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "accountBalances"
       | "depositTokens"
+      | "depositTokensToForwarder"
       | "getWhitelistedTokenAddresses"
       | "isTrustedForwarder"
       | "whitelistToken"
@@ -52,6 +54,14 @@ export interface StakingInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "depositTokens",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositTokensToForwarder",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "getWhitelistedTokenAddresses",
@@ -80,6 +90,10 @@ export interface StakingInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "depositTokens",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositTokensToForwarder",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -145,6 +159,13 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    depositTokensToForwarder(
+      amount: PromiseOrValue<BigNumberish>,
+      symbol: PromiseOrValue<BytesLike>,
+      forwarder: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     getWhitelistedTokenAddresses(
       token: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -185,6 +206,13 @@ export interface Staking extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  depositTokensToForwarder(
+    amount: PromiseOrValue<BigNumberish>,
+    symbol: PromiseOrValue<BytesLike>,
+    forwarder: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   getWhitelistedTokenAddresses(
     token: PromiseOrValue<BytesLike>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -222,6 +250,13 @@ export interface Staking extends BaseContract {
     depositTokens(
       amount: PromiseOrValue<BigNumberish>,
       symbol: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    depositTokensToForwarder(
+      amount: PromiseOrValue<BigNumberish>,
+      symbol: PromiseOrValue<BytesLike>,
+      forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -268,6 +303,13 @@ export interface Staking extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    depositTokensToForwarder(
+      amount: PromiseOrValue<BigNumberish>,
+      symbol: PromiseOrValue<BytesLike>,
+      forwarder: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     getWhitelistedTokenAddresses(
       token: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -306,6 +348,13 @@ export interface Staking extends BaseContract {
     depositTokens(
       amount: PromiseOrValue<BigNumberish>,
       symbol: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    depositTokensToForwarder(
+      amount: PromiseOrValue<BigNumberish>,
+      symbol: PromiseOrValue<BytesLike>,
+      forwarder: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
