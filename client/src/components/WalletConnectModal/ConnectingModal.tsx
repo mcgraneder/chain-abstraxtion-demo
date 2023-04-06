@@ -12,15 +12,23 @@ interface IconProps {
 }
 export const GetIcon = ({ active }: IconProps) => {
     return (
-        <>
-            {active ? (
-                <div>
-                    <UilCheckCircle color={"rgb(59 130 246)"} size={"80px"} />
-                </div>
-            ) : (
-                <UilSpinner size={20} className={" h-20 w-20 animate-spin text-blue-500"} />
-            )}
-        </>
+      <>
+        {active ? (
+          <div>
+            <UilCheckCircle
+              color={"#1fc7d4"}
+              size={"80px"}
+            />
+          </div>
+        ) : (
+          <UilSpinner
+            size={20}
+            className={
+              " h-20 w-20 animate-spin  text-[#1fc7d4] text-blue-500"
+            }
+          />
+        )}
+      </>
     );
 };
 
@@ -32,15 +40,17 @@ const ConnectingModalInner = ({ active, close }: { active: boolean; close: () =>
             <UilArrowLeft className={"hover:cursor-pointer"} />
           </div>
           <div onClick={close}>
-            <UilTimes className={" hover:cursor-pointer"} />
+            <UilTimes className={" hover:cursor-pointer text-[1fc7d4]"} />
           </div>
         </div>
         <div className="my-4 flex flex-col items-center justify-center  px-2">
           <GetIcon active={active} />
         </div>
         <div className="my-2 flex flex-col items-center gap-2">
-          <span className=" text-[17px] font-semibold">Waiting to connect</span>
-          <span className="text-[15px] text-gray-500">
+          <span className=" #280d5f text-[20px] font-[900]">
+            Waiting to connect
+          </span>
+          <span className="text-[16px]  text-[#7a6eaa]">
             Please confirm the request in your wallet
           </span>
         </div>

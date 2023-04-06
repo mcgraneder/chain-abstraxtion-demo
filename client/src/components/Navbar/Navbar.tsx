@@ -7,7 +7,8 @@ import { walletIcon } from "@/connection/wallets";
 import PrimaryButton from "../Buttons/PrimaryButton";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Image from "next/image";
+import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
+import Wallet from "../../../public/svgs/Wallet.svg"
 import AstralLogo from "../../../public/images/logo.svg";
 import { Wrapper, Nav, Box, BoxItemContainer } from "../CSS/Navbar.styles";
 
@@ -89,7 +90,9 @@ export const Navbar = ({
           <BoxItemContainer allignment={"flex-start"}>
             <div className="mr-5 hidden h-full items-center gap-2 sm:flex">
               <AstralLogo className="mx-4 h-[170px] w-[170px]" />
-              {activePath !== "/home" && <NavLinks routes={ROUTES} activePath={activePath}/>}
+              {activePath !== "/home" && (
+                <NavLinks routes={ROUTES} activePath={activePath} />
+              )}
             </div>
           </BoxItemContainer>
           <BoxItemContainer allignment={"flex-end"}>
@@ -98,20 +101,47 @@ export const Navbar = ({
                 <TokenSelectDropdown />
               </div>
             )} */}
-            <div className="mr-5 flex  h-full items-center">
+            { account ? (<div className="mr-5 flex  h-full items-center">
               <PrimaryButton
-                className="mt-[2px] bg-blue-500 py-[6px] hover:bg-blue-600"
+                className="relative mt-[2px] border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] bg-blue-500 bg-white py-[4px] hover:bg-blue-600"
                 onClick={ac}
               >
-                <span className="mr-2 hidden xs:block">
-                  {account ? shortenAddress(account) : "Connect"}
+                <div className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-black bg-white">
+                  <AssetIcon
+                    chainName={"BinanceSmartChain" as string}
+                    className="h-6 w-6"
+                  />
+                </div>
+                <span className="ml-6 mr-2 hidden font-[900] text-[#280d5f] xs:block">
+                  {"Binance Smart Chain"}
                 </span>
-                <span className="mr-2 hidden xs:block">|</span>
-                {active && Icon ? (
-                  <></> //<Icon className={"h-5 w-5"} />
-                ) : (
-                  <UilAngleDown className={"h-5 w-5"} />
-                )}
+                <UilAngleDown className={"h-5 w-5 text-[#280d5f] "} />
+              </PrimaryButton>
+            </div>) : null}
+            <div className="mr-5 flex  h-full items-center">
+              <PrimaryButton
+                className={`relative mt-[2px] ${
+                  account
+                    ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb]"
+                    : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
+                } py-[4px]`}
+                onClick={ac}
+              >
+                {account ? (
+                  <div className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#1fc7d4] bg-white">
+                    <Wallet className="h-7 w-7 text-[#1fc7d4]" />
+                  </div>
+                ) : null}
+                <span
+                  className={`${
+                    account ? "ml-6 mr-2 text-[#280d5f]" : " text-white"
+                  } hidden font-[900] xs:block`}
+                >
+                  {account ? shortenAddress(account) : "Connect Wallet"}
+                </span>
+                {account ? (
+                  <UilAngleDown className={"h-5 w-5 text-[#280d5f] "} />
+                ) : null}
               </PrimaryButton>
             </div>
           </BoxItemContainer>

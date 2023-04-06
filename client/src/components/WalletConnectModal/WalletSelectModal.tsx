@@ -42,13 +42,19 @@ const WalletOption = ({ connect, provider, active }: WalletOptionsProps) => {
         <>
             {getWalletOptions().map((wallet: WalletInfo) => {
                 return (
-                    <div key={wallet.provider} onClick={() => connect(wallet)} className='flex flex-row gap-3 rounded-xl border border-gray-500 bg-tertiary px-4 py-4 hover:cursor-pointer hover:bg-lightTertiary'>
-                        <div className='flex h-full'>
-                            <wallet.icon />
-                        </div>
-                        <span className='text-[17px] font-semibold'>{wallet.name}</span>
-                        {active && provider === wallet.provider && <GreenDot/>}
+                  <div
+                    key={wallet.provider}
+                    onClick={() => connect(wallet)}
+                    className="border-[rgb(151, 150, 152)] flex flex-row gap-3 rounded-xl border bg-[rgb(231,227,235)] px-4 py-4 hover:cursor-pointer"
+                  >
+                    <div className="flex h-full">
+                      <wallet.icon />
                     </div>
+                    <span className="text-[17px] font-semibold">
+                      {wallet.name}
+                    </span>
+                    {active && provider === wallet.provider && <GreenDot />}
+                  </div>
                 );
             })}
         </>
@@ -66,16 +72,16 @@ const WalletSelectModalInner = ({ connect, active, toggleWalletModal, deactivate
         </div>
         <div className="mt-4 flex flex-col justify-center gap-3 px-2">
           <WalletOption connect={connect} provider={provider} active={active} />
-          <div className="my-2 px-4 text-left text-[16px] text-gray-400">
-            By connecting a wallet, you agree to Astrals’ Terms of Service and
+          <div className="mt-1 mb-2 px-2 text-left text-[16px] text-gray-400">
+            By connecting a wallet, you agree to PancakeSwaps Terms of Service and
             consent to its Privacy Policy.
           </div>
         </div>
         {active ? (
-          <div className="mb-2 mt-2 flex items-center justify-center">
+          <div className="mb-2 mt-2 flex items-center justify-center px-2">
             <PrimaryButton
               className={
-                "w-full justify-center rounded-lg bg-blue-500 py-4 text-center hover:cursor-pointer hover:bg-blue-600"
+                "hover: w-full justify-center rounded-xl bg-[#1fc7d4] hover:bg-[#33e1ed] py-4 text-center font-[900] text-[18px] hover:cursor-pointer"
               }
               onClick={deactivate}
             >

@@ -6,11 +6,11 @@ export const Backdrop = styled.div`
   width: 100vw;
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(1px);
   z-index: 1000;
   pointer-events: none;
   transition: opacity 0.15s ease-in-out !important;
-  background: rgba(2, 8, 26, 0.45);
+  background: rgb(69, 32, 144, 0.45);
   ${(props: any) =>
     props.visible &&
     css`
@@ -29,11 +29,17 @@ export const FormWrapper = styled.div`
   text-align: right;
   padding: 30px 15px;
   padding-bottom: 20px;
-  border: 1.5px solid rgb(60, 65, 80);
   border-radius: 15px;
   display: block;
   z-index: 10000000000;
-
-  box-shadow: 14px 19px 5px 0px rgba(0, 0, 0, 0.85);
-  color: white;
+  border-radius: 24px;
+  max-width: 436px;
+  width: 100%;
+  z-index: 1;
+  border: 1px solid rgb(231, 227, 235);
+  background: white;
+  color: #280d5f;
+  /* font-weight: 900; */
+  /* padding: 20px; */
+  position: relative;
 `;

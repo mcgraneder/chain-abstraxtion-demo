@@ -38,8 +38,10 @@ const ConnectionErrorModalInner = ({ close, setConnecting, toggleWalletModal, pe
           <UilExclamationTriangle className={"h-20 w-20 text-red-500"} />
         </div>
         <div className="my-2 flex flex-col items-center gap-2 text-center">
-          <span className=" text-[17px] font-semibold">Error connecting</span>
-          <span className="text-[15px] text-gray-500">{message}</span>
+          <span className=" #280d5f text-[20px] font-[900]">
+            Error connecting
+          </span>
+          <span className="text-[16px]  text-[#7a6eaa]">{message}</span>
         </div>
         {/* {message !== ERROR_MESSSAGES["REQUEST_PENDING"] &&
         message !== ERROR_MESSSAGES["NO_PROVIDER"] ? (

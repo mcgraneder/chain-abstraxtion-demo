@@ -50,23 +50,23 @@ const WalletModal = () => {
               </span>
             </div>
           </div>
-            <div
-              className={`my-1 flex h-[100px] w-full  justify-end rounded-2xl bg-[#eeeaf4] px-4 ${
-                dropDownActive ? "border-4 border-purple-500" : ""
-              } mb-3`}
-              onClick={() => {
-                inputRef.current.focus();
-              }}
-            >
-              <Input
-                ref={inputRef}
-                type="number"
-                onFocus={() => setDropdownActive(true)}
-                onBlur={handleOnBlur}
-              />
-            </div>
-          <div className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-4">
-            <span className="text-[18px] text-white">Deposit</span>
+          <div
+            className={`my-1 flex h-[100px] w-full  justify-end rounded-2xl bg-[#eeeaf4] px-4 ${
+              dropDownActive ? "border-4 border-purple-500" : ""
+            } mb-3`}
+            onClick={() => {
+              inputRef.current.focus();
+            }}
+          >
+            <Input
+              ref={inputRef}
+              type="number"
+              onFocus={() => setDropdownActive(true)}
+              onBlur={handleOnBlur}
+            />
+          </div>
+          <div className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]">
+            <span className="text-[18px] font-[900] text-white">Deposit</span>
           </div>
         </div>
       </BridgeModalContainer>
