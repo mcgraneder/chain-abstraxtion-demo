@@ -2,16 +2,41 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { BridgeModalContainer, Input } from "../CSS/Wallet.styles";
 import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
 import { UilAngleDown } from "@iconscout/react-unicons";
+import { useGlobalState } from "@/context/GlobalState";
+import { AssetBaseConfig } from "@/utils/assetsConfig";
+import { formatBalance } from "@/utils/misc";
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  asset: AssetBaseConfig
 }
 
+interface Tabs {
+  index: number;
+  name: string;
+}
+
+const TABS: Tabs[] = [
+  {
+    index: 0,
+    name: "Deposit",
+  },
+  {
+    index: 1,
+    name: "Withdraw",
+  },
+  {
+    index: 2,
+    name: "Transfer",
+  }
+];
 
 
-const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
+const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
   const [dropDownActive, setDropdownActive] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<number>(0)
   const inputRef = useRef(null);
+  const { allBalances } = useGlobalState()
 
   const handleOnBlur = useCallback(() => {
     setTimeout(() => {
@@ -34,15 +59,14 @@ const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
           </div>
         </div>
         <div className="flex flex-row justify-between gap-2 border-b border-[rgb(231,227,235)]">
-          <div className="flex items-center justify-center border-b-2 border-[#1fc7d4] px-6 py-2 hover:cursor-pointer">
-            <span className="text-[rgb(118,69,217)] font-[800]">Deposit</span>
+          { TABS.map((tab: Tabs, index: number) => {
+            return (
+              <div className={`flex items-center justify-center ${activeTab === index && "border-b-2 border-[#1fc7d4]"} px-6 py-2 hover:cursor-pointer`} onClick={() => setActiveTab(index)}>
+            <span className={`${activeTab === index ? "text-[rgb(118,69,217)]" : "text-[#7a6eaa]"} font-[800]`}>{tab.name}</span>
           </div>
-          <div className="flex items-center justify-center px-6 py-2 hover:cursor-pointer">
-            <span className="text-[#7a6eaa] font-[800]">Withdraw</span>
-          </div>
-          <div className="flex items-center justify-center px-6 py-2 hover:cursor-pointer">
-            <span className="text-[#7a6eaa] font-[800]">Transfer</span>
-          </div>
+            )
+          })
+}
           {/* <div className="h-[1px] w-full bg-[rgb(231,227,235)]"></div> */}
         </div>
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
@@ -53,19 +77,19 @@ const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
             >
               <div className="h-6 w-6">
                 <AssetIcon
-                  chainName={"BinanceSmartChain" as string}
+                  chainName={asset.Icon as string}
                   className="h-6 w-6"
                 />
               </div>
-              <span className="#280d5f font-[900]">tBNB</span>
+              <span className="#280d5f font-[900]">{asset.shortName}</span>
               <div className={`flex h-6 w-6 items-center`}>
                 <UilAngleDown className="h-6 w-6 font-[900]" />
               </div>
             </div>
             <div>
-              <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                balance 0.00123 tBNB
-              </span>
+              {allBalances["BinanceSmartChain"] && <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                {`balance ${formatBalance(allBalances[asset.chain]![asset.shortName]?.walletBalance!, asset.decimals)} tBNB`}
+              </span>}
             </div>
           </div>
           <div

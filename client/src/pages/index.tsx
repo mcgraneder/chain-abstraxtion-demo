@@ -11,7 +11,7 @@ const Home: NextPage = () => {
   return (
     <Layout>
       <AssetListModal setShowTokenModal={setShowTokenModal} visible={showTokenModal} setAsset={setAsset}/>
-      <WalletModal setShowTokenModal={setShowTokenModal}/>
+      <WalletModal setShowTokenModal={setShowTokenModal} asset={asset}/>
     </Layout>
   );
 };
