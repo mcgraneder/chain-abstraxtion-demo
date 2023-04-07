@@ -6,6 +6,9 @@ import { UilAngleDown } from "@iconscout/react-unicons";
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+
+
 const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
   const [dropDownActive, setDropdownActive] = useState<boolean>(false);
   const inputRef = useRef(null);
@@ -15,6 +18,8 @@ const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
       setDropdownActive(false);
     }, 500);
   }, []);
+
+
   return (
     <div className="mt-[100px]">
       <BridgeModalContainer>
@@ -43,7 +48,7 @@ const WalletModal = ({ setShowTokenModal }: IWalletModal) => {
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
           <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
             <div
-              className={`flex items-center justify-center gap-2 hover:cursor-pointer`}
+              className={`flex itrm items-center justify-center gap-2 hover:cursor-pointer`}
               onClick={() => setShowTokenModal(true)}
             >
               <div className="h-6 w-6">

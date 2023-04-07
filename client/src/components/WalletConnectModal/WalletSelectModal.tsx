@@ -74,6 +74,7 @@ const WalletSelectModalInner = ({ connect, active, toggleWalletModal, deactivate
           <WalletOption connect={connect} provider={provider} active={active} />
           <div className="mt-1 mb-2 px-2 text-left text-[16px] text-gray-400">
             By connecting a wallet, you agree to PancakeSwaps Terms of Service and
+            by writing ti you sgfshould not noftot dot fotyrrr
             consent to its Privacy Policy.
           </div>
         </div>

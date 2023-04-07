@@ -36,6 +36,7 @@ export const assetsBaseConfig: Record<Asset, AssetBaseConfig> = {
     fullName: "PancakeCake Token",
     decimals: 18,
   },
+
 };
 
 export const assetsConfig = Object.fromEntries(
@@ -56,5 +57,3 @@ export const supportedAssets = [
   Asset.WBNB,
   Asset.CAKE,
 ];
-
-
