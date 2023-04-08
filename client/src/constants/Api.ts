@@ -8,8 +8,8 @@ const API = {
     balancesof: `${NextBaseUrl}/balancesof`,
   },
   backend: {
-    approvalTxTypedData: `http://localhost:4000/approvalTxTypedData`,
-    submitRelayTx: `http://localhost:4000/submitRelayTx`
+    txTypedData: `http://localhost:4000/TxTypedData`,
+    submitRelayTx: `http://localhost:4000/submitRelayTx`,
   },
 };
 

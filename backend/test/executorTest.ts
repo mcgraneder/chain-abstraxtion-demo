@@ -153,7 +153,7 @@ describe("Staking", function () {
         .connect(wallet1)
         .populateTransaction.depositTokensToForwarder(
           100,
-          WBTC,
+          wbtc.address,
           forwarder.address
         );
       const ALICEabcSignedTx2 = await sign(ALICEabcUnsignedTx2, wallet1);

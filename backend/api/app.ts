@@ -30,6 +30,7 @@ import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
 import { BigNumber as BN, BigNumberish, PopulatedTransaction } from "ethers";
 import ForwarderABI from "../constants/ABIs/Forwarder.json"
 import { ChainIdToChainName, forwarderDepolyments, forwarderV2Depolyments } from "../constants/deployments";
+import { Staking__factory } from '../typechain-types/factories/contracts/Deposit.sol/Staking__factory';
 
 const isAddressValid = (address: string): boolean => {
   if (/^0x[a-fA-F0-9]{40}$/.test(address)) return true;
@@ -141,7 +142,7 @@ const getMetaTxTypedData = async (
     name: "Executor",
     version: "0.0.1",
     chainId: sigChainID,
-    verifyingContract: "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
+    verifyingContract: "0x96B3059bA1785120aa072a6dcA329acc8C8FA324",
   };
 
   const types = {
@@ -159,7 +160,7 @@ const getMetaTxTypedData = async (
   };
 
     const forwarder = await ForwarderV2__factory.connect(
-      "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
+      "0xc82993eFc2B02bC4Df602D6De1cb70aC90b4DED2",
       (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
     );
     const nonce = await forwarder.getNonce(from!);
@@ -194,8 +195,8 @@ function requireQueryParams(params: Array<string>) {
 }
 
 app.get(
-  "/approvalTxTypedData",
-  requireQueryParams(["chainID", "sigChainID", "token", "to", "amount", "from"]),
+  "/TxTypedData",
+  requireQueryParams(["chainID", "sigChainID", "token", "to", "amount", "from", "transactionType"]),
   async (req, res) => {
     console.log("GET /transferTxTypedData");
     const chainID = parseInt(req.query.chainID!.toString());
@@ -204,21 +205,70 @@ app.get(
     const to = req.query.to!.toString();
     const amount = req.query.amount!.toString();
     const from = req.query.from!.toString();
+    const transactionType = req.query.transactionType!.toString();
+
     
     const { signer } = getChain(RenJSProvider, "BinanceSmartChain", RenNetwork.Testnet)
     const tokenContract = await ERC20__factory.connect(
       tokenAddress,
       (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
     );
-    const transferTx = await tokenContract
-      .connect(signer)
-      .populateTransaction.approve(to, amount, { gasLimit: 2000000 });
+    const depositer = await Staking__factory.connect(
+      "0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532",
+      (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
+    );
+    let tx2: PopulatedTransaction | null = null
+    let tx3: PopulatedTransaction | null = null
+
+    if (transactionType === "Deposit") {
+
+      tx2 = await depositer
+        .connect(signer)
+        .populateTransaction.depositTokens(
+          amount,
+          from,
+          tokenContract.address,
+          { gasLimit: 2000000 }
+        );
+
+      // tx3 = await tokenContract
+      //   .connect(signer)
+      //   .populateTransaction.transfer(
+      //     "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
+      //     amount,
+      //     { gasLimit: 2000000 }
+      //   );
+    } else if (
+      transactionType === "Withdraw" 
+      || transactionType === "Transfer"
+    ) {
+      tx2 =
+        transactionType === "Withdraw"
+          ? await depositer
+              .connect(signer)
+              .populateTransaction.withdrawTokens(
+                amount,
+                to,
+                from,
+                tokenContract.address,
+                { gasLimit: 2000000 }
+              )
+          : await depositer
+              .connect(signer)
+              .populateTransaction.withdrawTokens(
+                amount,
+                from,
+                from,
+                tokenContract.address,
+                { gasLimit: 2000000 }
+              );
+    }
 
     const userOps: UserOp[] = [
       {
-        to: tokenContract.address,
+        to: depositer.address,
         amount: "0",
-        data: transferTx.data!,
+        data: tx2?.data!,
       },
     ];
     const typedData = await getMetaTxTypedData(
@@ -241,7 +291,7 @@ app.post("/submitRelayTx", async (req, res) => {
 
   //handle case where this mapping returns null for unsupported chainId
   const forwarder = await ForwarderV2__factory.connect(
-    "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
+    "0xc82993eFc2B02bC4Df602D6De1cb70aC90b4DED2",
     (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
   );
   const { signer } = getChain(RenJSProvider, "BinanceSmartChain", RenNetwork.Testnet)

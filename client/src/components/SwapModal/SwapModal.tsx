@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { BridgeModalContainer, Input } from "../CSS/Wallet.styles";
 import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
-import { UilAngleDown, UilSpinnerAlt } from '@iconscout/react-unicons';
+import {
+  UilAngleDown,
+  UilSpinnerAlt,
+  UilArrowDown,
+  UilExchange
+} from "@iconscout/react-unicons";
 import { useGlobalState } from "@/context/GlobalState";
 import { AssetBaseConfig } from "@/utils/assetsConfig";
 import { formatBalance, formatBalancePercent } from "@/utils/misc";
@@ -10,7 +15,7 @@ import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
 import { useWeb3React } from "@web3-react/core";
 import { Wallet, ethers } from "ethers";
 import { getMetaTxTypedData } from "@/utils/getMetaTx";
-import ForwarderABI from "../../constants/ABIs/ForwarderABI.json"
+import ForwarderABI from "../../constants/ABIs/ForwarderABI.json";
 import API from "@/constants/Api";
 import BigNumber from "bignumber.js";
 import { get, post } from "@/services/axios";
@@ -23,7 +28,6 @@ import { useTransactionFlow } from "@/context/useTransactionFlowState";
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
-  setTransactionType: React.Dispatch<React.SetStateAction<string>>;
   asset: AssetBaseConfig;
   value: string;
   setValue: any;
@@ -49,27 +53,33 @@ const TABS: Tabs[] = [
   },
 ];
 
-const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setValue }: IWalletModal) => {
-  const { toggleConfirmationModal } = useTransactionFlow()
+const SwapModal = ({
+  setShowTokenModal,
+  asset,
+  value,
+  setValue,
+}: IWalletModal) => {
+  const { toggleConfirmationModal } = useTransactionFlow();
+  const [on, setOn] = useState<boolean>(false)
   const [dropDownActive, setDropdownActive] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<number>(0);
   const inputRef = useRef(null);
   const { allBalances, togglePending, exec } = useGlobalState();
 
-   const handleOnBlur = useCallback(() => {
-     setTimeout(() => {
-       setDropdownActive(false);
-     }, 500);
-   }, []);
+  const handleOnBlur = useCallback(() => {
+    setTimeout(() => {
+      setDropdownActive(false);
+    }, 500);
+  }, []);
 
-   const onMaxClick = (percent: number) => {
-     const inputOverride = formatBalancePercent(
-       allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-       asset.decimals,
-       percent / 10
-     );
-     setValue(inputOverride);
-   };
+  const onMaxClick = (percent: number) => {
+    const inputOverride = formatBalancePercent(
+      allBalances[asset.chain]![asset.shortName]?.walletBalance!,
+      asset.decimals,
+      percent / 10
+    );
+    setValue(inputOverride);
+  };
   return (
     <div className="mt-[100px]">
       <BridgeModalContainer>
@@ -79,37 +89,11 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
           </div>
           <div className="my-1">
             <span className="text-[15px] font-[600] text-[#7a6eaa]">
-              Deposit, withdraw or transfer tokens
+              Swap tokens without hassle
             </span>
           </div>
         </div>
-        <div className="flex flex-row justify-between gap-2 border-b border-[rgb(231,227,235)]">
-          {TABS.map((tab: Tabs, index: number) => {
-            return (
-              <div
-                className={`flex items-center justify-center ${
-                  activeTab === index && "border-b-2 border-[#1fc7d4]"
-                } px-6 py-2 hover:cursor-pointer`}
-                onClick={() => {
-                  setActiveTab(index)
-                  setTransactionType(tab.name)
-                }
-                }
-              >
-                <span
-                  className={`${
-                    activeTab === index
-                      ? "text-[rgb(118,69,217)]"
-                      : "text-[#7a6eaa]"
-                  } font-[800]`}
-                >
-                  {tab.name}
-                </span>
-              </div>
-            );
-          })}
-          {/* <div className="h-[1px] w-full bg-[rgb(231,227,235)]"></div> */}
-        </div>
+        <div className="h-[1px] w-full bg-[rgb(231,227,235)]"></div>
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
           <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
             <div
@@ -176,6 +160,71 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
               })}
             </div>
           </div>
+          <div className=" w-full">
+            <div
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#eeeaf4] hover:cursor-pointer hover:bg-[#1fc7d4]"
+              onMouseEnter={() => setOn(true)}
+              onMouseLeave={() => setOn(false)}
+            >
+              {on ? (
+                <UilExchange className="h-8 w-8 font-[900] text-white" />
+              ) : (
+                <UilArrowDown className="h-8 w-8 text-[#1fc7d4] hover:text-[#33e1ed]" />
+              )}
+            </div>
+          </div>
+          <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
+            <div
+              className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
+              onClick={() => setShowTokenModal(true)}
+            >
+              <div className="h-6 w-6">
+                <AssetIcon
+                  chainName={asset.Icon as string}
+                  className="h-6 w-6"
+                />
+              </div>
+              <span className="#280d5f font-[900]">{asset.shortName}</span>
+              <div className={`flex h-6 w-6 items-center`}>
+                <UilAngleDown className="h-6 w-6 font-[900]" />
+              </div>
+            </div>
+            <div>
+              {allBalances["BinanceSmartChain"] ? (
+                <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                  {`balance ${formatBalance(
+                    allBalances[asset.chain]![asset.shortName]?.walletBalance!,
+                    asset.decimals
+                  )} tBNB`}
+                </span>
+              ) : (
+                <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                  fetching balance{" "}
+                  <UilSpinnerAlt className="h-6 w-6 text-[#7a6eaa]" />
+                </span>
+              )}
+            </div>
+          </div>
+          <div
+            className={`my-1 flex h-[90px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
+              dropDownActive
+                ? "border-4 border-purple-500"
+                : "border-4 border-[#eeeaf4]"
+            } mb-3`}
+            onClick={() => {
+              inputRef.current.focus();
+            }}
+          >
+            <Input
+              ref={inputRef}
+              type="number"
+              value={value}
+              onChange={(e: any) => setValue(e.currentTarget.value)}
+              onFocus={() => setDropdownActive(true)}
+              onBlur={handleOnBlur}
+            />
+          </div>
+
           <div
             className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]"
             onClick={toggleConfirmationModal}
@@ -188,4 +237,4 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
   );
 };
 
-export default WalletModal;
+export default SwapModal;

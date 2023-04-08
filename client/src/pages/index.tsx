@@ -13,9 +13,12 @@ import BigNumber from 'bignumber.js';
 import { useGlobalState } from "@/context/GlobalState";
 import { get, post } from "@/services/axios";
 import { defaultAbiCoder } from "@ethersproject/abi";
+import { PopulatedTransaction, ethers } from "ethers";
+import { ERC20ABI } from '@renproject/chains-ethereum/contracts';
 
 const Home: NextPage = () => {
   const { library, account, chainId } = useWeb3React()
+  const [transactionType, setTransactionType] = useState<string>("Deposit")
   const [showTokenModal, setShowTokenModal] = useState<boolean>(false);
   const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
   const [value, setValue] = useState<string>("");
@@ -43,70 +46,89 @@ const Home: NextPage = () => {
         success: true,
       });
     };
-    const executeTx = useCallback(async () => {
-      if (!library || !account) return;
-      toggleConfirmationModal();
-      togglePendingModal();
-      const tokenAddress = asset.address;
-      const chainID = asset.chainId;
-      const transferTxTypedDataResponse = await get(
-        API.backend.approvalTxTypedData,
-        {
-          params: {
-            chainID,
-            sigChainID: chainId,
-            token: tokenAddress,
-            from: account,
-            to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
-            amount: new BigNumber(value).shiftedBy(asset.decimals).toFixed(),
-          },
-        }
-      );
-      if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
+const executeTx = useCallback(async () => {
+  if (!library || !account) return;
 
-      const { domain, types, values } = transferTxTypedDataResponse.result;
-      let signature;
-      try {
-        const signatureBase = await library
-          .getSigner()
-          ?._signTypedData(domain, types, values);
-        signature = defaultAbiCoder.encode(
-          ["uint256", "bytes"],
-          [chainId, signatureBase]
-        );
-        togglePending();
-        togglePendingModal();
-        toggleSubmittedModal();
-      } catch {
-        console.log("error");
-        toggleRejectedModal()
-      }
-      const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
-        forwardRequest: values.userOps,
-        forwarderAddress: "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
-        signature,
-        from: account!
+  console.log(transactionType);
+  toggleConfirmationModal();
+  togglePendingModal();
+  const tokenAddress = asset.address;
+  const chainID = asset.chainId;
+  const amount = new BigNumber(value).shiftedBy(asset.decimals).toFixed();
+  const transferTxTypedDataResponse = await get(API.backend.txTypedData, {
+    params: {
+      chainID,
+      sigChainID: chainId,
+      token: tokenAddress,
+      from: account,
+      to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
+      amount,
+      transactionType: transactionType,
+    },
+  });
+
+  if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
+
+  if (transactionType === "Deposit") {
+    const signer = library.getSigner();
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      library.getSigner()
+    ) as ethers.Contract;
+    const appprovalOp = await tokenContract
+      .connect(signer)
+      .approve?.("0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532", amount, {
+        gasLimit: 2000000,
       });
 
-      console.log(submitRelayTxResponse);
-      if (!submitRelayTxResponse) {
-        handleNewNotification(
-          "error",
-          "Approval Failed",
-          "Unable to approve recipient address",
-          "topR"
-        );
-      } else {
-        handleNewNotification(
-          "info",
-          "Approval Success",
-          "Sucessfully approved recipient address",
-          "topR"
-        );
-      }
-      togglePending();
-      console.log(submitRelayTxResponse);
-    }, [value, togglePending]);
+    await appprovalOp.wait(2);
+  }
+
+  const { domain, types, values } = transferTxTypedDataResponse.result;
+
+  let signature;
+  try {
+    const signatureBase = await library
+      .getSigner()
+      ?._signTypedData(domain, types, values);
+    signature = defaultAbiCoder.encode(
+      ["uint256", "bytes"],
+      [chainId, signatureBase]
+    );
+    togglePending();
+    togglePendingModal();
+    toggleSubmittedModal();
+  } catch {
+    console.log("error");
+    toggleRejectedModal();
+  }
+  const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
+    forwardRequest: values.userOps,
+    forwarderAddress: "0xc82993eFc2B02bC4Df602D6De1cb70aC90b4DED2",
+    signature,
+    from: account!,
+  });
+
+  console.log(submitRelayTxResponse);
+  if (!submitRelayTxResponse) {
+    handleNewNotification(
+      "error",
+      "Approval Failed",
+      "Unable to approve recipient address",
+      "topR"
+    );
+  } else {
+    handleNewNotification(
+      "info",
+      "Approval Success",
+      "Sucessfully approved recipient address",
+      "topR"
+    );
+  }
+  togglePending();
+  console.log(submitRelayTxResponse);
+}, [value, togglePending, library, account, transactionType]);
 
   return (
     <Layout>
@@ -123,6 +145,7 @@ const Home: NextPage = () => {
       />
       <WalletModal
         setShowTokenModal={setShowTokenModal}
+        setTransactionType={setTransactionType}
         asset={asset}
         value={value}
         setValue={setValue}

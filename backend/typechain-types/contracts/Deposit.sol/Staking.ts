@@ -25,14 +25,14 @@ import type {
 
 export interface StakingInterface extends utils.Interface {
   functions: {
-    "accountBalances(address,bytes32)": FunctionFragment;
-    "depositTokens(uint256,bytes32)": FunctionFragment;
-    "depositTokensToForwarder(uint256,bytes32,address)": FunctionFragment;
+    "accountBalances(address,address)": FunctionFragment;
+    "depositTokens(uint256,address,address)": FunctionFragment;
+    "depositTokensToForwarder(uint256,address,address,address)": FunctionFragment;
     "getWhitelistedTokenAddresses(bytes32)": FunctionFragment;
     "isTrustedForwarder(address)": FunctionFragment;
     "whitelistToken(bytes32,address)": FunctionFragment;
     "whitelistedTokens(bytes32)": FunctionFragment;
-    "withdrawTokens(uint256,bytes32)": FunctionFragment;
+    "withdrawTokens(uint256,address,address,address)": FunctionFragment;
   };
 
   getFunction(
@@ -49,17 +49,22 @@ export interface StakingInterface extends utils.Interface {
 
   encodeFunctionData(
     functionFragment: "accountBalances",
-    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]
+    values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "depositTokens",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "depositTokensToForwarder",
     values: [
       PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
       PromiseOrValue<string>
     ]
   ): string;
@@ -81,7 +86,12 @@ export interface StakingInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawTokens",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>
+    ]
   ): string;
 
   decodeFunctionResult(
@@ -149,19 +159,21 @@ export interface Staking extends BaseContract {
   functions: {
     accountBalances(
       arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
+      arg1: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     depositTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     depositTokensToForwarder(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      tokenAddress: PromiseOrValue<string>,
+      recipient: PromiseOrValue<string>,
       forwarder: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -189,26 +201,30 @@ export interface Staking extends BaseContract {
 
     withdrawTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
 
   accountBalances(
     arg0: PromiseOrValue<string>,
-    arg1: PromiseOrValue<BytesLike>,
+    arg1: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   depositTokens(
     amount: PromiseOrValue<BigNumberish>,
-    symbol: PromiseOrValue<BytesLike>,
+    recipient: PromiseOrValue<string>,
+    symbol: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   depositTokensToForwarder(
     amount: PromiseOrValue<BigNumberish>,
-    symbol: PromiseOrValue<BytesLike>,
+    tokenAddress: PromiseOrValue<string>,
+    recipient: PromiseOrValue<string>,
     forwarder: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -236,26 +252,30 @@ export interface Staking extends BaseContract {
 
   withdrawTokens(
     amount: PromiseOrValue<BigNumberish>,
-    symbol: PromiseOrValue<BytesLike>,
+    recipient: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    symbol: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
     accountBalances(
       arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
+      arg1: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     depositTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     depositTokensToForwarder(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      tokenAddress: PromiseOrValue<string>,
+      recipient: PromiseOrValue<string>,
       forwarder: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -283,7 +303,9 @@ export interface Staking extends BaseContract {
 
     withdrawTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -293,19 +315,21 @@ export interface Staking extends BaseContract {
   estimateGas: {
     accountBalances(
       arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
+      arg1: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     depositTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     depositTokensToForwarder(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      tokenAddress: PromiseOrValue<string>,
+      recipient: PromiseOrValue<string>,
       forwarder: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -333,7 +357,9 @@ export interface Staking extends BaseContract {
 
     withdrawTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -341,19 +367,21 @@ export interface Staking extends BaseContract {
   populateTransaction: {
     accountBalances(
       arg0: PromiseOrValue<string>,
-      arg1: PromiseOrValue<BytesLike>,
+      arg1: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     depositTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     depositTokensToForwarder(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      tokenAddress: PromiseOrValue<string>,
+      recipient: PromiseOrValue<string>,
       forwarder: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -381,7 +409,9 @@ export interface Staking extends BaseContract {
 
     withdrawTokens(
       amount: PromiseOrValue<BigNumberish>,
-      symbol: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      symbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

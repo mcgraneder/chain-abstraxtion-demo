@@ -15,7 +15,7 @@ export const forwarderV2Depolyments: { [chain: string]: string } = {
 
 export const depositorDeployments: { [chain: string]: string } = {
   [Chain.Ethereum]: "",
-  [Chain.BinanceSmartChain]: "0x78eE9C07767A42f3B1ECe5B8Ec59F4872CeFF44c", //"0x78eE9C07767A42f3B1ECe5B8Ec59F4872CeFF44c",
+  [Chain.BinanceSmartChain]: "0xdcD3911c131B8a789c936BF6d5893307e473832B", //"0x78eE9C07767A42f3B1ECe5B8Ec59F4872CeFF44c",
 };
 
 export enum SupportedChainId {

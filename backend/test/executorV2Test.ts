@@ -106,8 +106,8 @@ describe("Staking", function () {
     await wbtc.deployed();
 
     wbtc.connect(wallet1).transfer(wallet2.address, 1000);
-    await wbtc.connect(wallet1).approve(staking.address, 100);
-    await wbtc.connect(wallet2).approve(staking.address, 100);
+    // await wbtc.connect(wallet1).approve(staking.address, 100);
+    // await wbtc.connect(wallet2).approve(staking.address, 100);
 
     WBTC = ethers.utils.formatBytes32String("Wbtc");
     await staking.whitelistToken(WBTC, wbtc.address);
@@ -144,7 +144,7 @@ describe("Staking", function () {
 
   describe("withdraw", function () {
     it("should withdraw wbtc from the contract", async function () {
-      await wbtc.connect(wallet1).approve(staking.address, 600);
+    //   await wbtc.connect(wallet1).approve(staking.address, 600);
       await staking.connect(wallet1).depositTokens(600, WBTC);
       await staking.connect(wallet1).withdrawTokens(100, WBTC);
 
@@ -162,7 +162,7 @@ describe("Staking", function () {
   });
   describe("Forwarder", function () {
     it("should be able to deposit through frowarder", async function () {
-      await wbtc.connect(wallet1).approve(staking.address, 100);
+    //   await wbtc.connect(wallet1).approve(staking.address, 100);
 
       console.log(
         "balance Before",
@@ -176,7 +176,7 @@ describe("Staking", function () {
         .connect(wallet1)
         .populateTransaction.depositTokensToForwarder(
           100,
-          WBTC,
+          wbtc.address,
           forwarder.address
         );
 

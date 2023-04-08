@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 contract Staking is ERC2771Context {
   address owner;
   mapping(bytes32 => address) public whitelistedTokens;
-  mapping(address => mapping(bytes32 => uint256)) public accountBalances;
+  mapping(address => mapping(address => uint256)) public accountBalances;
 
   constructor(MinimalForwarder forwarder) // Initialize trusted forwarder
     ERC2771Context(address(forwarder)) {
@@ -27,26 +27,24 @@ contract Staking is ERC2771Context {
     return whitelistedTokens[token];
   }
 
-  function depositTokens(uint256 amount, bytes32 symbol) external {
-    accountBalances[_msgSender()][symbol] += amount;
-    uint256 allowance = ERC20(whitelistedTokens[symbol]).allowance(_msgSender(), address(this));
+  function depositTokens(uint256 amount, address recipient, address symbol) external {
+    accountBalances[recipient][symbol] += amount;
+    uint256 allowance = ERC20(symbol).allowance(_msgSender(), address(this));
     // console.log("allowance", _msgSender(), _msgSender());
-    ERC20(whitelistedTokens[symbol]).transferFrom(_msgSender(), address(this), amount);
+    ERC20(symbol).transferFrom(recipient, address(this), amount);
   }
 
-    function depositTokensToForwarder(uint256 amount, bytes32 symbol, address forwarder) external {
-    accountBalances[_msgSender()][symbol] += amount;
-    uint256 allowance = ERC20(whitelistedTokens[symbol]).allowance(_msgSender(), address(this));
-    console.log("allowance", _msgSender(), forwarder);
-    ERC20(whitelistedTokens[symbol]).transferFrom(_msgSender(), address(this), amount);
-    ERC20(whitelistedTokens[symbol]).transfer(forwarder, amount);
+    function depositTokensToForwarder(uint256 amount, address tokenAddress, address recipient, address forwarder) external {
+    // accountBalances[_msgSender()][symbol] += amount;
+      ERC20(tokenAddress).transferFrom(recipient, address(this), amount);
+      ERC20(tokenAddress).transfer(forwarder, amount);
   }
 
-  function withdrawTokens(uint256 amount, bytes32 symbol) external {
-    require(accountBalances[_msgSender()][symbol] >= amount, 'Insufficent funds');
+  function withdrawTokens(uint256 amount, address recipient, address from, address symbol) external {
+    require(accountBalances[from][symbol] >= amount, 'Insufficent funds');
 
-    accountBalances[_msgSender()][symbol] -= amount;
-    ERC20(whitelistedTokens[symbol]).transfer(_msgSender(), amount);
+    accountBalances[recipient][symbol] -= amount;
+    ERC20(symbol).transfer(recipient, amount);
   }
 
     function _msgSender()
