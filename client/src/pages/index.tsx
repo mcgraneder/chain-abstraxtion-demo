@@ -12,6 +12,7 @@ import API from "@/constants/Api";
 import BigNumber from 'bignumber.js';
 import { useGlobalState } from "@/context/GlobalState";
 import { get, post } from "@/services/axios";
+import { defaultAbiCoder } from "@ethersproject/abi";
 
 const Home: NextPage = () => {
   const { library, account, chainId } = useWeb3React()
@@ -66,9 +67,13 @@ const Home: NextPage = () => {
       const { domain, types, values } = transferTxTypedDataResponse.result;
       let signature;
       try {
-        signature = await library
+        const signatureBase = await library
           .getSigner()
           ?._signTypedData(domain, types, values);
+        signature = defaultAbiCoder.encode(
+          ["uint256", "bytes"],
+          [chainId, signatureBase]
+        );
         togglePending();
         togglePendingModal();
         toggleSubmittedModal();
@@ -77,9 +82,10 @@ const Home: NextPage = () => {
         toggleRejectedModal()
       }
       const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
-        forwardRequest: values,
-        forwarderAddress: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
+        forwardRequest: values.userOps,
+        forwarderAddress: "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
         signature,
+        from: account!
       });
 
       console.log(submitRelayTxResponse);

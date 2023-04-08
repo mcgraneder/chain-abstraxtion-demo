@@ -7,6 +7,12 @@ export const forwarderDepolyments: { [chain: string]: string } = {
   [Chain.BinanceSmartChain]: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
 };
 
+export const forwarderV2Depolyments: { [chain: string]: string } = {
+  [Chain.Ethereum]: "0x716497Ab7aDAB1aE1abB649dF97734B20B8eBc05",
+  [Chain.BinanceSmartChain]: "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
+};
+
+
 export const depositorDeployments: { [chain: string]: string } = {
   [Chain.Ethereum]: "",
   [Chain.BinanceSmartChain]: "0x78eE9C07767A42f3B1ECe5B8Ec59F4872CeFF44c", //"0x78eE9C07767A42f3B1ECe5B8Ec59F4872CeFF44c",

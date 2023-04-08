@@ -42,7 +42,19 @@ contract Forwarder {
 
     function verify(Request calldata req, bytes calldata signature) public view returns (bool) {
         address signer = domainSeperator(req.sigChainID).toTypedDataHash(
-            keccak256(abi.encode(_TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, req.chainID, req.sigChainID, keccak256(req.data)))
+            keccak256(
+                abi.encode(
+                    _TYPEHASH, 
+                    req.from, 
+                    req.to, 
+                    req.value, 
+                    req.gas, 
+                    req.nonce, 
+                    req.chainID, 
+                    req.sigChainID, 
+                    keccak256(req.data)
+                )
+            )
         ).recover(signature);
         return block.chainid == req.chainID && _nonces[req.from] == req.nonce && signer == req.from;
     }

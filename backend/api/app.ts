@@ -25,11 +25,11 @@ import { APIError } from "./utils/APIError";
 import { getEVMProvider, getEVMChain, getChain } from "./utils/getProvider";
 import { EthereumBaseChain } from "@renproject/chains-ethereum/base";
 import { returnContract } from "./utils/getContract";
-import { ERC20__factory, Forwarder, Forwarder__factory, IERC20 } from "../typechain-types";
+import { ERC20__factory, Forwarder, ForwarderV2__factory, Forwarder__factory, IERC20 } from "../typechain-types";
 import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
 import { BigNumber as BN, BigNumberish, PopulatedTransaction } from "ethers";
 import ForwarderABI from "../constants/ABIs/Forwarder.json"
-import { ChainIdToChainName, forwarderDepolyments } from "../constants/deployments";
+import { ChainIdToChainName, forwarderDepolyments, forwarderV2Depolyments } from "../constants/deployments";
 
 const isAddressValid = (address: string): boolean => {
   if (/^0x[a-fA-F0-9]{40}$/.test(address)) return true;
@@ -60,6 +60,18 @@ app.get("/", (req, res) => {
   res.status(200).send({ result: "ok" });
 });
 
+export interface UserOp {
+  to: string;
+  amount: string;
+  data: string;
+}
+
+export interface Transaction {
+  userOps: UserOp[];
+  chainID: number;
+  signature: string;
+}
+
 function parseContractError(err: any): string {
   return (
     err as {
@@ -68,54 +80,100 @@ function parseContractError(err: any): string {
   ).reason;
 }
 
+// const getMetaTxTypedData = async (
+//   tx: PopulatedTransaction,
+//   sigChainID: number,
+//   chainId: number,
+//   from?: string,
+//   nonceIn?: BigNumberish
+// ) => {
+//   const domain = {
+//     name: "CatalogForworder",
+//     version: "0.0.1",
+//     chainId: sigChainID,
+//     verifyingContract: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
+//   };
+
+//   const types = {
+//     CatalogRequest: [
+//       { name: "from", type: "address" },
+//       { name: "to", type: "address" },
+//       { name: "value", type: "uint256" },
+//       { name: "gas", type: "uint256" },
+//       { name: "nonce", type: "uint256" },
+//       { name: "chainID", type: "uint256" },
+//       { name: "sigChainID", type: "uint256" },
+//       { name: "data", type: "bytes" },
+//     ],
+//   };
+
+//   const forwarder = await Forwarder__factory.connect(
+//     forwarderV2Depolyments[chainId],
+//     (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
+//   );
+//   const nonce = nonceIn || (await forwarder.getNonce(from ? from : tx.from!));
+
+//   const values = {
+//     from: from ? from : tx.from!,
+//     to: tx.to!,
+//     value: 0,
+//     gas: tx.gasLimit! || 0,
+//     nonce: nonce.toString(),
+//     chainID: chainId,
+//     sigChainID: sigChainID,
+//     data: tx.data!,
+//   };
+
+//   return {
+//     domain: domain,
+//     types: types,
+//     values: values,
+//   };
+// };
+
 const getMetaTxTypedData = async (
-  tx: PopulatedTransaction,
+  userOps: UserOp[],
   sigChainID: number,
   chainId: number,
-  from?: string,
-  nonceIn?: BigNumberish
+  from?: string
 ) => {
   const domain = {
-    name: "CatalogForworder",
+    name: "Executor",
     version: "0.0.1",
     chainId: sigChainID,
-    verifyingContract: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
+    verifyingContract: "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
   };
 
   const types = {
-    CatalogRequest: [
-      { name: "from", type: "address" },
+    UserOperation: [
       { name: "to", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "gas", type: "uint256" },
+      { name: "amount", type: "uint256" },
+      { name: "data", type: "bytes" },
+    ],
+    ECDSAExec: [
+      { name: "userOps", type: "UserOperation[]" },
       { name: "nonce", type: "uint256" },
       { name: "chainID", type: "uint256" },
       { name: "sigChainID", type: "uint256" },
-      { name: "data", type: "bytes" },
     ],
   };
 
-  const forwarder = await Forwarder__factory.connect(
-    forwarderDepolyments[chainId],
-    (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
-  );
-  const nonce = nonceIn || (await forwarder.getNonce(from ? from : tx.from!));
-
+    const forwarder = await ForwarderV2__factory.connect(
+      "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
+      (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
+    );
+    const nonce = await forwarder.getNonce(from!);
   const values = {
-    from: from ? from : tx.from!,
-    to: tx.to!,
-    value: 0,
-    gas: tx.gasLimit! || 0,
-    nonce: nonce.toString(),
+    userOps: userOps,
+    nonce: nonce,
     chainID: chainId,
     sigChainID: sigChainID,
-    data: tx.data!,
   };
 
   return {
-    domain: domain,
-    types: types,
-    values: values,
+    domain,
+    types,
+    values,
   };
 };
 
@@ -155,8 +213,20 @@ app.get(
     const transferTx = await tokenContract
       .connect(signer)
       .populateTransaction.approve(to, amount, { gasLimit: 2000000 });
-    
-    const typedData = await getMetaTxTypedData(transferTx, sigChainID, chainID, from);
+
+    const userOps: UserOp[] = [
+      {
+        to: tokenContract.address,
+        amount: "0",
+        data: transferTx.data!,
+      },
+    ];
+    const typedData = await getMetaTxTypedData(
+      userOps,
+      sigChainID,
+      chainID,
+      from
+    );
     console.log(typedData);
     res.json({ result: typedData });
   }
@@ -170,16 +240,17 @@ app.post("/submitRelayTx", async (req, res) => {
   const signature = req.body["signature"];
 
   //handle case where this mapping returns null for unsupported chainId
-  const forwarder = await Forwarder__factory.connect(
-    forwarderDepolyments[ChainIdToChainName[forwardRequest.chainID]],
+  const forwarder = await ForwarderV2__factory.connect(
+    "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
     (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
   );
   const { signer } = getChain(RenJSProvider, "BinanceSmartChain", RenNetwork.Testnet)
   const gasPrice = await forwarder!.provider.getGasPrice();
    try {
-     const gas = await forwarder!.estimateGas.execute(
+     const gas = await forwarder!.estimateGas.exec(
        forwardRequest,
-       signature
+       signature,
+       req.body["from"]
      );
      const txCost = gasPrice.mul(gas);
      const ADMIN = signer.getAddress();
@@ -195,9 +266,10 @@ app.post("/submitRelayTx", async (req, res) => {
      res.status(400).send({ error: parseContractError(err) });
      return;
    }
-   const execTx = await forwarder.populateTransaction.execute(
+   const execTx = await forwarder.populateTransaction.exec(
      forwardRequest,
      signature,
+     req.body["from"],
      { gasLimit: 2000000 }
    );
    const walletTx = await signer.sendTransaction(execTx);

@@ -5,4 +5,3 @@ export * as delegatedEcexutorV1Sol from "./DelegatedEcexutorV1.sol";
 export * as delegatedExecutorV2Sol from "./DelegatedExecutorV2.sol";
 export * as depositSol from "./Deposit.sol";
 export * as testErc20Sol from "./TestERC20.sol";
-export { Greeter__factory } from "./Greeter__factory";
