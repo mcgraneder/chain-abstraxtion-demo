@@ -7,6 +7,10 @@ const API = {
   next: {
     balancesof: `${NextBaseUrl}/balancesof`,
   },
+  backend: {
+    approvalTxTypedData: `http://localhost:4000/approvalTxTypedData`,
+    submitRelayTx: `http://localhost:4000/submitRelayTx`
+  },
 };
 
 export default API;

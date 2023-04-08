@@ -1,18 +1,21 @@
 import { BigNumberish, PopulatedTransaction } from "ethers";
+import getContract from "./getContract";
+import ForwarderABI from "../constants/ABIs/ForwarderABI.json"
+import { Web3Provider } from '@ethersproject/providers';
 
-const getMetaTxTypedData = async (
+export const getMetaTxTypedData = async (
   tx: PopulatedTransaction,
   sigChainID: number,
+  library: Web3Provider,
+  chainId: number,
   from?: string,
-  chainId?: number,
-  nonceIn?: BigNumberish,
-  catalogForwarder?: string
+  nonceIn?: BigNumberish
 ) => {
   const domain = {
     name: "CatalogForworder",
     version: "0.0.1",
     chainId: sigChainID,
-    verifyingContract: Forwarder || Forwarder.address,
+    verifyingContract: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
   };
 
   const types = {
@@ -28,6 +31,12 @@ const getMetaTxTypedData = async (
     ],
   };
 
+  const CatalogForwarder = getContract(
+    "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
+    ForwarderABI,
+    library
+  );
+
   const nonce =
     nonceIn || (await CatalogForwarder.getNonce(from ? from : tx.from!));
 
@@ -35,9 +44,9 @@ const getMetaTxTypedData = async (
     from: from ? from : tx.from!,
     to: tx.to!,
     value: 0,
-    gas: tx.gasLimit! || 0,
+    gas: 50000,
     nonce: nonce.toString(),
-    chainID: chainId || hre.network.config.chainId!,
+    chainID: chainId,
     sigChainID: sigChainID,
     data: tx.data!,
   };

@@ -146,22 +146,22 @@ describe("Staking", function () {
         "balance Before",
         await staking.accountBalances(wallet1.address, WBTC)
       );  
-      const ALICEabcUnsignedTx = await staking
+      const ALICEabcUnsignedTx = await wbtc
         .connect(wallet1)
-        .populateTransaction.depositTokensToForwarder(100, WBTC, forwarder.address);
+        .populateTransaction.approve(staking.address, 100)
       const ALICEabcSignedTx = await sign(ALICEabcUnsignedTx, wallet1);
       await forwarder.execute(ALICEabcSignedTx.values, ALICEabcSignedTx.sig);
             console.log(
               "balance after",
               Number(await wbtc.balanceOf(owner.address))
             ); 
-       const ALICEabcUnsignedTx2 = await wbtc.populateTransaction.transfer(owner.address, 100); 
-      const ALICEabcSignedTx2 = await sign(ALICEabcUnsignedTx2, wallet1);
-       await forwarder.execute(ALICEabcSignedTx2.values, ALICEabcSignedTx2.sig);
-       console.log(
-         "balance after",
-         Number(await wbtc.balanceOf(owner.address))
-       ); 
+      //  const ALICEabcUnsignedTx2 = await wbtc.populateTransaction.transfer(owner.address, 100); 
+      // const ALICEabcSignedTx2 = await sign(ALICEabcUnsignedTx2, wallet1);
+      //  await forwarder.execute(ALICEabcSignedTx2.values, ALICEabcSignedTx2.sig);
+      //  console.log(
+      //    "balance after",
+      //    Number(await wbtc.balanceOf(owner.address))
+      //  ); 
     });
   });
 });

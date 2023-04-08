@@ -28,6 +28,10 @@ contract Forwarder {
 
     mapping(address => uint256) private _nonces;
 
+     receive() external payable {
+           
+    }
+
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];
     }

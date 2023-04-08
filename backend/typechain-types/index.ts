@@ -22,7 +22,5 @@ export type { Forwarder } from "./contracts/DelegatedEcexutorV1.sol/Forwarder";
 export { Forwarder__factory } from "./factories/contracts/DelegatedEcexutorV1.sol/Forwarder__factory";
 export type { Staking } from "./contracts/Deposit.sol/Staking";
 export { Staking__factory } from "./factories/contracts/Deposit.sol/Staking__factory";
-export type { Greeter } from "./contracts/Greeter";
-export { Greeter__factory } from "./factories/contracts/Greeter__factory";
 export type { Wbtc } from "./contracts/TestERC20.sol/Wbtc";
 export { Wbtc__factory } from "./factories/contracts/TestERC20.sol/Wbtc__factory";
