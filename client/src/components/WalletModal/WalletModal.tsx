@@ -63,23 +63,21 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
     setValue(inputOverride);
   };
 
-  useEffect(() => console.log(value), [value])
   const executeTx = useCallback(async() => {
-    console.log("hey1")
     if (!library || !account) return;
-    console.log("hey2")
 
     const tokenAddress = asset.address;
+    const chainID = asset.chainId
     const transferTxTypedDataResponse = await get(
       API.backend.approvalTxTypedData,
       {
         params: {
-          chainID: 97,
+          chainID,
+          sigChainID: chainId,
           token: tokenAddress,
           from: account,
           to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
           amount: new BigNumber(value).shiftedBy(asset.decimals).toFixed(),
-          transferTx: "h",
         },
       }
     );
@@ -103,6 +101,7 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
      if (!submitRelayTxResponse) throw new Error("");
      console.log(submitRelayTxResponse)
   }, [value]);
+  
   return (
     <div className="mt-[100px]">
       <BridgeModalContainer>

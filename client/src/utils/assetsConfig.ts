@@ -8,6 +8,7 @@ export type AssetLabelsConfig = {
   decimals: number;
   address: string;
   chain: string;
+  chainId: 97;
 };
 
 export type AssetBaseConfig = AssetIconsConfig &
@@ -31,7 +32,8 @@ export const assetsBaseConfig: Record<Asset, AssetBaseConfig> = {
     fullName: "Binance USD",
     decimals: 18,
     address: "0xaB1a4d4f1D656d2450692D237fdD6C7f9146e814",
-    chain: "BinanceSmartChain"
+    chain: "BinanceSmartChain",
+    chainId: 97
   },
   WBNB: {
     Icon: Asset.WBNB,
@@ -39,7 +41,8 @@ export const assetsBaseConfig: Record<Asset, AssetBaseConfig> = {
     fullName: "Wrapped BNB",
     decimals: 18,
     address: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
-    chain: "BinanceSmartChain"
+    chain: "BinanceSmartChain",
+    chainId: 97
   },
   CAKE: {
     Icon: Asset.CAKE,
@@ -47,7 +50,8 @@ export const assetsBaseConfig: Record<Asset, AssetBaseConfig> = {
     fullName: "PancakeCake Token",
     decimals: 18,
     address: "0xFa60D973F7642B748046464e165A65B7323b0DEE",
-    chain: "BinanceSmartChain"
+    chain: "BinanceSmartChain",
+    chainId: 97
   },
 };
 
