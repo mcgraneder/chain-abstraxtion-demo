@@ -14,6 +14,11 @@ import ForwarderABI from "../../constants/ABIs/ForwarderABI.json"
 import API from "@/constants/Api";
 import BigNumber from "bignumber.js";
 import { get, post } from "@/services/axios";
+import {
+  IPosition,
+  notifyType,
+  useNotification,
+} from "@/context/useNotificationState";
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -47,6 +52,22 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const inputRef = useRef(null);
   const { allBalances } = useGlobalState();
+  const dispatch = useNotification();
+
+  const handleNewNotification = (
+    type: notifyType,
+    title: string,
+    message: string,
+    position: IPosition
+  ) => {
+    dispatch({
+      type: type,
+      message: message,
+      title: title,
+      position: position,
+      success: true,
+    });
+  };
 
   const handleOnBlur = useCallback(() => {
     setTimeout(() => {
@@ -63,11 +84,11 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
     setValue(inputOverride);
   };
 
-  const executeTx = useCallback(async() => {
+  const executeTx = useCallback(async () => {
     if (!library || !account) return;
 
     const tokenAddress = asset.address;
-    const chainID = asset.chainId
+    const chainID = asset.chainId;
     const transferTxTypedDataResponse = await get(
       API.backend.approvalTxTypedData,
       {
@@ -81,7 +102,7 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
         },
       }
     );
-     if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
+    if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
 
     const { domain, types, values } = transferTxTypedDataResponse.result;
     let signature;
@@ -92,16 +113,31 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
     } catch {
       console.log("error");
     }
-     const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
-       forwardRequest: values,
-       forwarderAddress: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
-       signature,
-     });
+    const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
+      forwardRequest: values,
+      forwarderAddress: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
+      signature,
+    });
 
-     if (!submitRelayTxResponse) throw new Error("");
-     console.log(submitRelayTxResponse)
+    console.log(submitRelayTxResponse)
+    if (!submitRelayTxResponse) {
+      handleNewNotification(
+        "error",
+        "Approval Failed",
+        "Unable to approve recipient address",
+        "topR"
+      );
+    } else {
+      handleNewNotification(
+        "info",
+        "Approval Success",
+        "Sucessfully approved recipient address",
+        "topR"
+      );
+    }
+    console.log(submitRelayTxResponse);
   }, [value]);
-  
+
   return (
     <div className="mt-[100px]">
       <BridgeModalContainer>
@@ -199,7 +235,10 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
               })}
             </div>
           </div>
-          <div className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]" onClick={executeTx}>
+          <div
+            className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]"
+            onClick={executeTx}
+          >
             <span className="text-[18px] font-[900] text-white">Deposit</span>
           </div>
         </div>
