@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { BridgeModalContainer, Input } from "../CSS/Wallet.styles";
 import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
-import { UilAngleDown } from "@iconscout/react-unicons";
+import { UilAngleDown, UilSpinnerAlt } from '@iconscout/react-unicons';
 import { useGlobalState } from "@/context/GlobalState";
 import { AssetBaseConfig } from "@/utils/assetsConfig";
 import { formatBalance, formatBalancePercent } from "@/utils/misc";
@@ -19,10 +19,13 @@ import {
   notifyType,
   useNotification,
 } from "@/context/useNotificationState";
+import { useTransactionFlow } from "@/context/useTransactionFlowState";
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
   asset: AssetBaseConfig;
+  value: string;
+  setValue: any;
 }
 
 interface Tabs {
@@ -45,99 +48,27 @@ const TABS: Tabs[] = [
   },
 ];
 
-const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
-  const { library, account, chainId } = useWeb3React();
+const WalletModal = ({ setShowTokenModal, asset, value, setValue }: IWalletModal) => {
+  const { toggleConfirmationModal } = useTransactionFlow()
   const [dropDownActive, setDropdownActive] = useState<boolean>(false);
-  const [value, setValue] = useState<string>("");
   const [activeTab, setActiveTab] = useState<number>(0);
   const inputRef = useRef(null);
-  const { allBalances } = useGlobalState();
-  const dispatch = useNotification();
+  const { allBalances, togglePending, exec } = useGlobalState();
 
-  const handleNewNotification = (
-    type: notifyType,
-    title: string,
-    message: string,
-    position: IPosition
-  ) => {
-    dispatch({
-      type: type,
-      message: message,
-      title: title,
-      position: position,
-      success: true,
-    });
-  };
+   const handleOnBlur = useCallback(() => {
+     setTimeout(() => {
+       setDropdownActive(false);
+     }, 500);
+   }, []);
 
-  const handleOnBlur = useCallback(() => {
-    setTimeout(() => {
-      setDropdownActive(false);
-    }, 500);
-  }, []);
-
-  const onMaxClick = (percent: number) => {
-    const inputOverride = formatBalancePercent(
-      allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-      asset.decimals,
-      percent / 10
-    );
-    setValue(inputOverride);
-  };
-
-  const executeTx = useCallback(async () => {
-    if (!library || !account) return;
-
-    const tokenAddress = asset.address;
-    const chainID = asset.chainId;
-    const transferTxTypedDataResponse = await get(
-      API.backend.approvalTxTypedData,
-      {
-        params: {
-          chainID,
-          sigChainID: chainId,
-          token: tokenAddress,
-          from: account,
-          to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
-          amount: new BigNumber(value).shiftedBy(asset.decimals).toFixed(),
-        },
-      }
-    );
-    if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
-
-    const { domain, types, values } = transferTxTypedDataResponse.result;
-    let signature;
-    try {
-      signature = await library
-        .getSigner()
-        ?._signTypedData(domain, types, values);
-    } catch {
-      console.log("error");
-    }
-    const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
-      forwardRequest: values,
-      forwarderAddress: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
-      signature,
-    });
-
-    console.log(submitRelayTxResponse)
-    if (!submitRelayTxResponse) {
-      handleNewNotification(
-        "error",
-        "Approval Failed",
-        "Unable to approve recipient address",
-        "topR"
-      );
-    } else {
-      handleNewNotification(
-        "info",
-        "Approval Success",
-        "Sucessfully approved recipient address",
-        "topR"
-      );
-    }
-    console.log(submitRelayTxResponse);
-  }, [value]);
-
+   const onMaxClick = (percent: number) => {
+     const inputOverride = formatBalancePercent(
+       allBalances[asset.chain]![asset.shortName]?.walletBalance!,
+       asset.decimals,
+       percent / 10
+     );
+     setValue(inputOverride);
+   };
   return (
     <div className="mt-[100px]">
       <BridgeModalContainer>
@@ -192,12 +123,17 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
               </div>
             </div>
             <div>
-              {allBalances["BinanceSmartChain"] && (
+              {allBalances["BinanceSmartChain"] ? (
                 <span className="text-[15px] font-[600] text-[#7a6eaa]">
                   {`balance ${formatBalance(
                     allBalances[asset.chain]![asset.shortName]?.walletBalance!,
                     asset.decimals
                   )} tBNB`}
+                </span>
+              ) : (
+                <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                  fetching balance{" "}
+                  <UilSpinnerAlt className="h-6 w-6 text-[#7a6eaa]" />
                 </span>
               )}
             </div>
@@ -237,7 +173,7 @@ const WalletModal = ({ setShowTokenModal, asset }: IWalletModal) => {
           </div>
           <div
             className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]"
-            onClick={executeTx}
+            onClick={toggleConfirmationModal}
           >
             <span className="text-[18px] font-[900] text-white">Deposit</span>
           </div>

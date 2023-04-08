@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styled, { css } from "styled-components/macro";
-import { UilAngleDown } from "@iconscout/react-unicons";
+import { UilAngleDown, UilSpinnerAlt } from "@iconscout/react-unicons";
 import { useWeb3React } from "@web3-react/core";
 import { shortenAddress } from "@/utils/misc";
 import { walletIcon } from "@/connection/wallets";
@@ -8,10 +8,11 @@ import PrimaryButton from "../Buttons/PrimaryButton";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
-import Wallet from "../../../public/svgs/Wallet.svg"
+import Wallet from "../../../public/svgs/Wallet.svg";
 import AstralLogo from "../../../public/images/logo.svg";
 import { Wrapper, Nav, Box, BoxItemContainer } from "../CSS/Navbar.styles";
 import TokenSelectDropdown from "../ChainSelector/ChainSelector";
+import { useGlobalState } from "@/context/GlobalState";
 
 interface INavbar {
   toggleWalletModal: () => void;
@@ -20,7 +21,13 @@ interface INavbar {
 
 const ROUTES: string[] = ["faucet", "wallet", "trade"];
 
-const NavLinks = ({ routes, activePath }: { routes: string[], activePath: string }) => {
+const NavLinks = ({
+  routes,
+  activePath,
+}: {
+  routes: string[];
+  activePath: string;
+}) => {
   return (
     <>
       {routes.map((route: string, index: number) => {
@@ -33,9 +40,7 @@ const NavLinks = ({ routes, activePath }: { routes: string[], activePath: string
           >
             <span
               className={`my-2 w-full rounded-xl px-4 py-2 text-center text-[16px] font-[900] ${
-                index === 0
-                  ? "text-[rgb(118,69,217)]"
-                  : "text-[#7a6eaa]"
+                index === 0 ? "text-[rgb(118,69,217)]" : "text-[#7a6eaa]"
               } hover:cursor-pointer hover:bg-[#e9eaeb]`}
             >
               {route}
@@ -55,8 +60,9 @@ export const Navbar = ({
   const [provider, setProvider] = useState<string | null>(null);
   const router = useRouter();
   const { account, active } = useWeb3React();
+  const { pending } = useGlobalState();
   const activePath = router.pathname;
-  console.log(activePath)
+  console.log(activePath);
 
   const changeBackground = () => {
     if (window.scrollY >= 66) {
@@ -101,27 +107,37 @@ export const Navbar = ({
             <div className="mr-5 flex  h-full items-center">
               <PrimaryButton
                 className={`relative mt-[2px] ${
-                  account
+                  account || !pending
                     ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] hover:bg-[#eeeef1]"
                     : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
                 } py-[4px]`}
                 onClick={ac}
               >
-                {account ? (
+                {account || pending ? (
                   <div className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#1fc7d4] bg-white">
                     <Wallet className="h-7 w-7 text-[#1fc7d4]" />
                   </div>
                 ) : null}
                 <span
                   className={`${
-                    account ? "ml-6 mr-2 text-[#280d5f]" : " text-white"
+                    account || pending
+                      ? "ml-6 mr-2 text-[#280d5f]"
+                      : " text-white"
                   } hidden font-[900] xs:block`}
                 >
-                  {account ? shortenAddress(account) : "Connect Wallet"}
+                  {pending
+                    ? "1 Pending Tx"
+                    : account
+                    ? shortenAddress(account)
+                    : "Connect Wallet"}
                 </span>
-                {account ? (
-                  <UilAngleDown className={"h-5 w-5 text-[#280d5f] "} />
-                ) : null}
+                {pending ? (
+                  <UilSpinnerAlt className="h-6 w-6 animate-spin text-gray-500" />
+                ) : (
+                  account && (
+                    <UilAngleDown className={"h-5 w-5 text-[#280d5f] "} />
+                  )
+                )}
               </PrimaryButton>
             </div>
           </BoxItemContainer>

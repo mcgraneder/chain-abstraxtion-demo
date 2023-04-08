@@ -4,14 +4,123 @@ import WalletModal from "@/components/WalletModal/WalletModal";
 import { Layout } from "@/layouts";
 import type { NextPage } from "next";
 import { AssetBaseConfig, assetsBaseConfig } from '../utils/assetsConfig';
+import TransactionFlowModals from "@/components/TxConfirmationModalFlow";
+import { useWeb3React } from "@web3-react/core";
+import { IPosition, notifyType, useNotification } from "@/context/useNotificationState";
+import { useTransactionFlow } from "@/context/useTransactionFlowState";
+import API from "@/constants/Api";
+import BigNumber from 'bignumber.js';
+import { useGlobalState } from "@/context/GlobalState";
+import { get, post } from "@/services/axios";
 
 const Home: NextPage = () => {
-  const [showTokenModal, setShowTokenModal] = useState<boolean>(false)
-  const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD)
+  const { library, account, chainId } = useWeb3React()
+  const [showTokenModal, setShowTokenModal] = useState<boolean>(false);
+  const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
+  const [value, setValue] = useState<string>("");
+  const { togglePending } = useGlobalState()
+
+    const dispatch = useNotification();
+    const {
+      toggleConfirmationModal,
+      togglePendingModal,
+      toggleSubmittedModal,
+      toggleRejectedModal,
+    } = useTransactionFlow();
+
+    const handleNewNotification = (
+      type: notifyType,
+      title: string,
+      message: string,
+      position: IPosition
+    ) => {
+      dispatch({
+        type: type,
+        message: message,
+        title: title,
+        position: position,
+        success: true,
+      });
+    };
+    const executeTx = useCallback(async () => {
+      if (!library || !account) return;
+      toggleConfirmationModal();
+      togglePendingModal();
+      const tokenAddress = asset.address;
+      const chainID = asset.chainId;
+      const transferTxTypedDataResponse = await get(
+        API.backend.approvalTxTypedData,
+        {
+          params: {
+            chainID,
+            sigChainID: chainId,
+            token: tokenAddress,
+            from: account,
+            to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
+            amount: new BigNumber(value).shiftedBy(asset.decimals).toFixed(),
+          },
+        }
+      );
+      if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
+
+      const { domain, types, values } = transferTxTypedDataResponse.result;
+      let signature;
+      try {
+        signature = await library
+          .getSigner()
+          ?._signTypedData(domain, types, values);
+        togglePending();
+        togglePendingModal();
+        toggleSubmittedModal();
+      } catch {
+        console.log("error");
+        toggleRejectedModal()
+      }
+      const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
+        forwardRequest: values,
+        forwarderAddress: "0x6bB441DA26a349a706B1af6C8C4835B802cDe7d8",
+        signature,
+      });
+
+      console.log(submitRelayTxResponse);
+      if (!submitRelayTxResponse) {
+        handleNewNotification(
+          "error",
+          "Approval Failed",
+          "Unable to approve recipient address",
+          "topR"
+        );
+      } else {
+        handleNewNotification(
+          "info",
+          "Approval Success",
+          "Sucessfully approved recipient address",
+          "topR"
+        );
+      }
+      togglePending();
+      console.log(submitRelayTxResponse);
+    }, [value, togglePending]);
+
   return (
     <Layout>
-      <AssetListModal setShowTokenModal={setShowTokenModal} visible={showTokenModal} setAsset={setAsset}/>
-      <WalletModal setShowTokenModal={setShowTokenModal} asset={asset}/>
+      <TransactionFlowModals
+        asset={asset}
+        buttonState={"Approval"}
+        text={value}
+        executeTx={executeTx}
+      />
+      <AssetListModal
+        setShowTokenModal={setShowTokenModal}
+        visible={showTokenModal}
+        setAsset={setAsset}
+      />
+      <WalletModal
+        setShowTokenModal={setShowTokenModal}
+        asset={asset}
+        value={value}
+        setValue={setValue}
+      />
     </Layout>
   );
 };

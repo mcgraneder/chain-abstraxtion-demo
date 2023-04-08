@@ -1,4 +1,5 @@
-import {
+import React, {
+  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -19,6 +20,11 @@ type GlobalContextType = {
   allBalances: {
     [chain: string]: { [x: string]: MulticallReturn };
   };
+  pending: boolean;
+  setPending: React.Dispatch<SetStateAction<boolean>>;
+  togglePending: () => void;
+  fetchingBalances: boolean;
+  exec: (execute: () => void) => void;
 };
 
 export type MulticallReturn = {
@@ -37,8 +43,9 @@ export type GP = {
 const GlobalStateContext = createContext({} as GlobalContextType);
 
 function GlobalStateProvider({ children }: GlobalStateProviderProps) {
-  const { account, chainId, active } = useWeb3React();
-  const [loading, setLoading] = useState<boolean>(true);
+  const { account, active } = useWeb3React();
+  const [fetchingBalances, setFetchingBalances] = useState<boolean>(false)
+  const [pending, setPending] = useState<boolean>(false);
  
   const [allBalances, setAllBalances] = useState<{
     [chain: string]: { [x: string]: MulticallReturn };
@@ -47,9 +54,13 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
     [x: string]: MulticallReturn;
   } | undefined>(undefined);
 
+  const togglePending = useCallback(() => {
+    setPending((p: boolean) => !p)
+  }, [setPending])
+
   const memoizedFetchBalances = useCallback(async () => {
     if (!account) return;
-    // setFetchingBalances(true);
+    setFetchingBalances(true);
     const tokensResponse = await get<{
       result: {
         multicall: {
@@ -62,17 +73,11 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
       },
     });
     if (!tokensResponse) {
-      // setFetchingBalances(false);
+      setFetchingBalances(false);
       throw new Error("Multicall Failed");
     }
-
-    console.log(tokensResponse.result.multicall)
     setAllBalances(tokensResponse.result.multicall);
-    // setFetchingBalances(false);
   }, [account]);
-
-
- 
 
   useEffect(() => {
     if (!active) return;
@@ -82,12 +87,18 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
     return () => clearInterval(interval);
   }, [memoizedFetchBalances, active]);
 
+  const exec = (execute: () => void) => execute()
  
   return (
     <GlobalStateContext.Provider
       value={{
         memoizedFetchBalances,
         allBalances,
+        pending,
+        setPending,
+        togglePending,
+        fetchingBalances,
+        exec
       }}
     >
       {children}
