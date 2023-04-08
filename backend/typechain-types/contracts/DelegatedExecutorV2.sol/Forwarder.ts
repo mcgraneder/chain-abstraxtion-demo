@@ -8,12 +8,16 @@ import type {
   BytesLike,
   CallOverrides,
   ContractTransaction,
-  PayableOverrides,
+  Overrides,
   PopulatedTransaction,
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -24,7 +28,7 @@ import type {
 } from "../../common";
 
 export declare namespace Forwarder {
-  export type RequestStruct = {
+  export type UserOpStruct = {
     from: PromiseOrValue<string>;
     to: PromiseOrValue<string>;
     value: PromiseOrValue<BigNumberish>;
@@ -35,7 +39,7 @@ export declare namespace Forwarder {
     data: PromiseOrValue<BytesLike>;
   };
 
-  export type RequestStructOutput = [
+  export type UserOpStructOutput = [
     string,
     string,
     BigNumber,
@@ -59,17 +63,12 @@ export declare namespace Forwarder {
 export interface ForwarderInterface extends utils.Interface {
   functions: {
     "domainSeperator(uint256)": FunctionFragment;
-    "execute((address,address,uint256,uint256,uint256,uint256,uint256,bytes),bytes)": FunctionFragment;
+    "exec((address,address,uint256,uint256,uint256,uint256,uint256,bytes)[],bytes)": FunctionFragment;
     "getNonce(address)": FunctionFragment;
-    "verify((address,address,uint256,uint256,uint256,uint256,uint256,bytes),bytes)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic:
-      | "domainSeperator"
-      | "execute"
-      | "getNonce"
-      | "verify"
+    nameOrSignatureOrTopic: "domainSeperator" | "exec" | "getNonce"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -77,28 +76,53 @@ export interface ForwarderInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "execute",
-    values: [Forwarder.RequestStruct, PromiseOrValue<BytesLike>]
+    functionFragment: "exec",
+    values: [Forwarder.UserOpStruct[], PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
     functionFragment: "getNonce",
     values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "verify",
-    values: [Forwarder.RequestStruct, PromiseOrValue<BytesLike>]
   ): string;
 
   decodeFunctionResult(
     functionFragment: "domainSeperator",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "exec", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getNonce", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "verify", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "LogCall(address,uint256,bytes)": EventFragment;
+    "LogReceivedEther(address,uint256)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "LogCall"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "LogReceivedEther"): EventFragment;
 }
+
+export interface LogCallEventObject {
+  _contract: string;
+  _value: BigNumber;
+  _data: string;
+}
+export type LogCallEvent = TypedEvent<
+  [string, BigNumber, string],
+  LogCallEventObject
+>;
+
+export type LogCallEventFilter = TypedEventFilter<LogCallEvent>;
+
+export interface LogReceivedEtherEventObject {
+  _from: string;
+  _amount: BigNumber;
+}
+export type LogReceivedEtherEvent = TypedEvent<
+  [string, BigNumber],
+  LogReceivedEtherEventObject
+>;
+
+export type LogReceivedEtherEventFilter =
+  TypedEventFilter<LogReceivedEtherEvent>;
 
 export interface Forwarder extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -132,22 +156,16 @@ export interface Forwarder extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    execute(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    exec(
+      userOps: Forwarder.UserOpStruct[],
+      _signature: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     getNonce(
       from: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
-
-    verify(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
   };
 
   domainSeperator(
@@ -155,10 +173,10 @@ export interface Forwarder extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
-  execute(
-    req: Forwarder.RequestStruct,
-    signature: PromiseOrValue<BytesLike>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  exec(
+    userOps: Forwarder.UserOpStruct[],
+    _signature: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   getNonce(
@@ -166,21 +184,15 @@ export interface Forwarder extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  verify(
-    req: Forwarder.RequestStruct,
-    signature: PromiseOrValue<BytesLike>,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
   callStatic: {
     domainSeperator(
       _chainID: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    execute(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
+    exec(
+      userOps: Forwarder.UserOpStruct[],
+      _signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -188,15 +200,29 @@ export interface Forwarder extends BaseContract {
       from: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    verify(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
   };
 
-  filters: {};
+  filters: {
+    "LogCall(address,uint256,bytes)"(
+      _contract?: PromiseOrValue<string> | null,
+      _value?: null,
+      _data?: null
+    ): LogCallEventFilter;
+    LogCall(
+      _contract?: PromiseOrValue<string> | null,
+      _value?: null,
+      _data?: null
+    ): LogCallEventFilter;
+
+    "LogReceivedEther(address,uint256)"(
+      _from?: PromiseOrValue<string> | null,
+      _amount?: null
+    ): LogReceivedEtherEventFilter;
+    LogReceivedEther(
+      _from?: PromiseOrValue<string> | null,
+      _amount?: null
+    ): LogReceivedEtherEventFilter;
+  };
 
   estimateGas: {
     domainSeperator(
@@ -204,20 +230,14 @@ export interface Forwarder extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    execute(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    exec(
+      userOps: Forwarder.UserOpStruct[],
+      _signature: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     getNonce(
       from: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    verify(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
@@ -228,20 +248,14 @@ export interface Forwarder extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    execute(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    exec(
+      userOps: Forwarder.UserOpStruct[],
+      _signature: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     getNonce(
       from: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    verify(
-      req: Forwarder.RequestStruct,
-      signature: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };

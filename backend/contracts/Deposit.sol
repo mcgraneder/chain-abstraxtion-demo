@@ -30,14 +30,14 @@ contract Staking is ERC2771Context {
   function depositTokens(uint256 amount, bytes32 symbol) external {
     accountBalances[_msgSender()][symbol] += amount;
     uint256 allowance = ERC20(whitelistedTokens[symbol]).allowance(_msgSender(), address(this));
-    console.log("allowance", _msgSender(), _msgSender());
+    // console.log("allowance", _msgSender(), _msgSender());
     ERC20(whitelistedTokens[symbol]).transferFrom(_msgSender(), address(this), amount);
   }
 
     function depositTokensToForwarder(uint256 amount, bytes32 symbol, address forwarder) external {
     accountBalances[_msgSender()][symbol] += amount;
     uint256 allowance = ERC20(whitelistedTokens[symbol]).allowance(_msgSender(), address(this));
-    console.log("allowance", _msgSender(), _msgSender());
+    console.log("allowance", _msgSender(), forwarder);
     ERC20(whitelistedTokens[symbol]).transferFrom(_msgSender(), address(this), amount);
     ERC20(whitelistedTokens[symbol]).transfer(forwarder, amount);
   }

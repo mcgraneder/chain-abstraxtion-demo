@@ -3,7 +3,10 @@
 /* eslint-disable */
 import type * as delegatedEcexutorV1Sol from "./DelegatedEcexutorV1.sol";
 export type { delegatedEcexutorV1Sol };
+import type * as delegatedExecutorV2Sol from "./DelegatedExecutorV2.sol";
+export type { delegatedExecutorV2Sol };
 import type * as depositSol from "./Deposit.sol";
 export type { depositSol };
 import type * as testErc20Sol from "./TestERC20.sol";
 export type { testErc20Sol };
+export type { Greeter } from "./Greeter";
