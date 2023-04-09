@@ -47,15 +47,15 @@ const config = {
     ];
   },
 
-  //   async redirects() {
-  //   return [
-  //     {
-  //       source: "/",
-  //       destination: "/home",
-  //       permanent: false,
-  //     },
-  //   ];
-  // },
+    async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/home",
+        permanent: false,
+      },
+    ];
+  },
 
   /**
    * If you have the "experimental: { appDir: true }" setting enabled, then you

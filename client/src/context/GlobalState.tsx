@@ -25,6 +25,8 @@ type GlobalContextType = {
   togglePending: () => void;
   fetchingBalances: boolean;
   exec: (execute: () => void) => void;
+  openWalletModal: boolean;
+  toggleWalletModal: () => void;
 };
 
 export type MulticallReturn = {
@@ -46,6 +48,12 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
   const { account, active } = useWeb3React();
   const [fetchingBalances, setFetchingBalances] = useState<boolean>(false)
   const [pending, setPending] = useState<boolean>(false);
+   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false);
+
+   const toggleWalletModal = useCallback(
+     () => setOpenWalletModal((w) => !w),
+     [setOpenWalletModal]
+   );
  
   const [allBalances, setAllBalances] = useState<{
     [chain: string]: { [x: string]: MulticallReturn };
@@ -98,7 +106,9 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
         setPending,
         togglePending,
         fetchingBalances,
-        exec
+        exec,
+        openWalletModal,
+        toggleWalletModal
       }}
     >
       {children}

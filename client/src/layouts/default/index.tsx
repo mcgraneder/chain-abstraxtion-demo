@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar/Navbar";
 import WalletConnect from "@/components/WalletConnectModal/WalletConnectModal";
 import useWallet from "@/hooks/useWallet";
+import { useGlobalState } from "@/context/GlobalState";
 
 interface DefaultLayoutProps {
   children: React.ReactNode;
@@ -9,13 +10,8 @@ interface DefaultLayoutProps {
 
 function DefaultLayout({ children }: DefaultLayoutProps) {
   const wallet = useWallet()
-  // useEffect(() => console.log(openWalletModal), [openWalletModal]);
-   const [openWalletModal, setOpenWalletModal] = useState<boolean>(false);
+  const { openWalletModal, toggleWalletModal } = useGlobalState()
 
-     const toggleWalletModal = useCallback(
-       () => setOpenWalletModal((w) => !w),
-       [setOpenWalletModal]
-     );
   return (
     <div className="flex h-screen flex-col items-center text-white  lg:h-auto lg:min-h-screen">
       <Navbar

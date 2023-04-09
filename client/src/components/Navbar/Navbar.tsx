@@ -13,13 +13,17 @@ import AstralLogo from "../../../public/images/logo.svg";
 import { Wrapper, Nav, Box, BoxItemContainer } from "../CSS/Navbar.styles";
 import TokenSelectDropdown from "../ChainSelector/ChainSelector";
 import { useGlobalState } from "@/context/GlobalState";
+import Settings from "../../../public/svgs/settings.svg"
+import Global from "../../../public/svgs/global.svg"
+import Pancake from "../../../public/svgs/pcake.svg"
+
 
 interface INavbar {
   toggleWalletModal: () => void;
   toggleAccoundDetailsModal: () => void;
 }
 
-const ROUTES: string[] = ["faucet", "wallet", "trade"];
+const ROUTES: string[] = ["home", "faucet", "wallet", "swap"];
 
 const NavLinks = ({
   routes,
@@ -97,12 +101,20 @@ export const Navbar = ({
           <BoxItemContainer allignment={"flex-start"}>
             <div className="mr-5 hidden h-full items-center gap-2 sm:flex">
               <AstralLogo className="mx-4 h-[170px] w-[170px]" />
-              {activePath !== "/home" && (
-                <NavLinks routes={ROUTES} activePath={activePath} />
-              )}
+              <NavLinks routes={ROUTES} activePath={activePath} />
             </div>
           </BoxItemContainer>
           <BoxItemContainer allignment={"flex-end"}>
+            <div className="flex items-center justify-center gap-6 px-4">
+              <div className="flex items-center justify-end gap-2">
+                <Pancake />
+                <span className="font-[900] text-[16px] text-[rgb(122,110,170)]">
+                  $32.45
+                </span>
+              </div>
+              <Global className="text-[rgb(122,110,170)]" />
+              <Settings className="text-[rgb(122,110,170)]" />
+            </div>
             {account ? <TokenSelectDropdown /> : null}
             <div className="mr-5 flex  h-full items-center">
               <PrimaryButton
