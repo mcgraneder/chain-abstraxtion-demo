@@ -66,7 +66,7 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
      const inputOverride = formatBalancePercent(
        allBalances[asset.chain]![asset.shortName]?.walletBalance!,
        asset.decimals,
-       percent / 10
+       percent / 100
      );
      setValue(inputOverride);
    };
@@ -150,6 +150,7 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
                 : "border-4 border-[#eeeaf4]"
             } mb-3`}
             onClick={() => {
+              //@ts-ignore
               inputRef.current.focus();
             }}
           >

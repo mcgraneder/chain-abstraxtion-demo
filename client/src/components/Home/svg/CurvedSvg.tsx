@@ -1,9 +1,8 @@
 import styled, { css, DefaultTheme } from "styled-components";
 import Box from "@/components/Box/Box";
-import { ClipFill } from "../CurvedDivider";
 
 interface CurveProps {
-  clipFill?: ClipFill;
+  clipFill?: any;
 }
 
 interface ContainerProps extends CurveProps {
@@ -11,9 +10,9 @@ interface ContainerProps extends CurveProps {
 }
 
 const sharedStyles = (
-  theme: DefaultTheme,
+  theme: any,
   clipPath: string,
-  clipFill?: ClipFill
+  clipFill?: any
 ) => css`
   width: 100%;
   height: 20px;
@@ -34,15 +33,15 @@ const sharedStyles = (
 //   }};
 
 const ConcaveContainer = styled(Box)<ContainerProps>`
-  ${({ theme, clipPath, clipFill }) => sharedStyles(theme, clipPath, clipFill)}
-  transform: ${({ clipPath }) =>
+  ${({ theme, clipPath, clipFill }: any) => sharedStyles(theme, clipPath, clipFill)}
+  transform: ${({ clipPath }: any) =>
     clipPath === "#bottomConcaveCurve"
       ? "translate(0, -13px)"
       : "translate(0, 1px)"};
 `;
 
 const ConvexContainer = styled(Box)<ContainerProps>`
-  ${({ theme, clipPath, clipFill }) => sharedStyles(theme, clipPath, clipFill)}
+  ${({ theme, clipPath, clipFill }: any) => sharedStyles(theme, clipPath, clipFill)}
  
 `;
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import AssetListModal from "@/components/AssetListModal/AssetListModal";
 import WalletModal from "@/components/WalletModal/WalletModal";
 import { Layout } from "@/layouts";
@@ -17,8 +17,8 @@ import BigNumber from "bignumber.js";
 import { useGlobalState } from "@/context/GlobalState";
 import { get, post } from "@/services/axios";
 import { defaultAbiCoder } from "@ethersproject/abi";
-import { PopulatedTransaction, ethers } from "ethers";
 import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
+import { ethers } from 'ethers';
 
 const Home: NextPage = () => {
   const { library, account, chainId } = useWeb3React();
@@ -52,8 +52,6 @@ const Home: NextPage = () => {
   };
   const executeTx = useCallback(async () => {
     if (!library || !account) return;
-
-    console.log(transactionType);
     toggleConfirmationModal();
     togglePendingModal();
     const tokenAddress = asset.address;
@@ -89,6 +87,7 @@ const Home: NextPage = () => {
       await appprovalOp.wait(2);
     }
 
+//@ts-ignore
     const { domain, types, values } = transferTxTypedDataResponse.result;
 
     let signature;
@@ -106,6 +105,7 @@ const Home: NextPage = () => {
     } catch {
       console.log("error");
       toggleRejectedModal();
+      togglePending();
     }
     const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
       forwardRequest: values.userOps,
@@ -114,24 +114,22 @@ const Home: NextPage = () => {
       from: account!,
     });
 
-    console.log(submitRelayTxResponse);
     if (!submitRelayTxResponse) {
       handleNewNotification(
         "error",
-        "Approval Failed",
+        "Transaction Failed",
         "Unable to approve recipient address",
         "topR"
       );
     } else {
       handleNewNotification(
         "info",
-        "Approval Success",
-        "Sucessfully approved recipient address",
+        "Transaction Success",
+        "your transaction has executed successfully",
         "topR"
       );
     }
     togglePending();
-    console.log(submitRelayTxResponse);
   }, [value, togglePending, library, account, transactionType]);
 
   return (
@@ -146,6 +144,7 @@ const Home: NextPage = () => {
         setShowTokenModal={setShowTokenModal}
         visible={showTokenModal}
         setAsset={setAsset}
+        setToAsset={() => null}
       />
       <WalletModal
         setShowTokenModal={setShowTokenModal}

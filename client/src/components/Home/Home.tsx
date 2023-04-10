@@ -6,9 +6,8 @@ import CompositeImage, { CompositeImageProps } from "./CompositeImage";
 import { SlideSvgDark, SlideSvgLight } from "./SlideSvg";
 import { useWeb3React } from "@web3-react/core";
 import { forwardRef } from "react";
-import NextLink from "next/link";
-import Heading, { Heading2 } from "../Box/Heading";
 import PrimaryButton from '../Buttons/PrimaryButton';
+import NextLink from 'next/link';
 
 
 // react-router-dom LinkProps types
@@ -158,14 +157,14 @@ const Hero = () => {
         id="homepage-hero"
       >
         <Flex flex="1" flexDirection="column">
-          <Heading scale="xxl" color="rgb(118,69,217)" mb="24px">
+          {/* <Heading scale="xxl" color="rgb(118,69,217)" mb="24px">
             {"Enjoy your Cake from anywhere!"}
           </Heading>
           <Heading2 scale="md" mb="24px" color={""}>
             {
               "On PancakeSwap V3, Defi users can execute swaps & trades on any chain from any chain. It's that simple"
             }
-          </Heading2>
+          </Heading2> */}
           <Flex>
             <PrimaryButton
               className={`relative mr-4 mt-[2px] ${

@@ -1,9 +1,36 @@
 import { UilCheckCircle, UilCopy } from "@iconscout/react-unicons";
 import React from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import useCopy from "../../hooks/useCopy";
 
-export default function CopyHelper(props: {
+export function useCopy(
+  timeout = 500
+): [boolean, (toCopy: string) => void] {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const staticCopy = useCallback((text: string) => {
+    // copyText(text);
+    setIsCopied(true);
+  }, []);
+
+  useEffect(() => {
+    if (isCopied) {
+      const hide = setTimeout(() => {
+        setIsCopied(false);
+      }, timeout);
+
+      return () => {
+        clearTimeout(hide);
+      };
+    }
+    return undefined;
+  }, [isCopied, setIsCopied, timeout]);
+
+  return [isCopied, staticCopy];
+}
+
+
+export function CopyHelper(props: {
   toCopy: string;
   children?: React.ReactNode;
 }) {

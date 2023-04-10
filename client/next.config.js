@@ -1,9 +1,4 @@
-import webpack from "webpack"
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
- * This is especially useful for Docker builds.
- */
-!process.env.SKIP_ENV_VALIDATION && (await import("./src/env.mjs"));
+const webpack = require("webpack");
 
 const securityHeaders = [
   {
@@ -25,19 +20,21 @@ const securityHeaders = [
   },
 ];
 
-/** @type {import("next").NextConfig} */
-const config = {
-   reactStrictMode: false,
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false,
   webpack(config, { buildId }) {
     config.module.rules.push({ test: /\.svg$/, use: ["@svgr/webpack"] });
     config.plugins.push(
-      new webpack.DefinePlugin({ "process.env.BUILD_ID": JSON.stringify(buildId) })
+      new webpack.DefinePlugin({
+        "process.env.BUILD_ID": JSON.stringify(buildId),
+      })
     );
-    config.resolve.fallback = { fs: false, module: false, path: false }
+    config.resolve.fallback = { fs: false, module: false, path: false };
     return config;
   },
 
-    async headers() {
+  async headers() {
     return [
       {
         // Apply these headers to all routes in your application.
@@ -47,7 +44,7 @@ const config = {
     ];
   },
 
-    async redirects() {
+  async redirects() {
     return [
       {
         source: "/",
@@ -56,17 +53,6 @@ const config = {
       },
     ];
   },
-
-  /**
-   * If you have the "experimental: { appDir: true }" setting enabled, then you
-   * must comment the below `i18n` config out.
-   *
-   * @see https://github.com/vercel/next.js/issues/41980
-   */
-  i18n: {
-    locales: ["en"],
-    defaultLocale: "en",
-  },
 };
 
-export default config;
+module.exports = nextConfig;

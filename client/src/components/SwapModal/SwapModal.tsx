@@ -10,20 +10,7 @@ import {
 import { useGlobalState } from "@/context/GlobalState";
 import { AssetBaseConfig } from "@/utils/assetsConfig";
 import { formatBalance, formatBalancePercent } from "@/utils/misc";
-import getContract from "@/utils/getContract";
-import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
 import { useWeb3React } from "@web3-react/core";
-import { Wallet, ethers } from "ethers";
-import { getMetaTxTypedData } from "@/utils/getMetaTx";
-import ForwarderABI from "../../constants/ABIs/ForwarderABI.json";
-import API from "@/constants/Api";
-import BigNumber from "bignumber.js";
-import { get, post } from "@/services/axios";
-import {
-  IPosition,
-  notifyType,
-  useNotification,
-} from "@/context/useNotificationState";
 import { useTransactionFlow } from "@/context/useTransactionFlowState";
 import { usePriceQuery } from "@/hooks/usePriceQuery";
 
@@ -36,31 +23,12 @@ interface IWalletModal {
   outputAmount: string;
   setOutputAmount: any;
   toAsset: AssetBaseConfig;
-  transaction: any;
-  setTransaction: any;
-  executeTx: () => Promise<void>;
-  toggleSwap: () => void;
 }
 
 interface Tabs {
   index: number;
   name: string;
 }
-
-const TABS: Tabs[] = [
-  {
-    index: 0,
-    name: "Deposit",
-  },
-  {
-    index: 1,
-    name: "Withdraw",
-  },
-  {
-    index: 2,
-    name: "Transfer",
-  },
-];
 
 const SwapModal = ({
   setShowTokenModal,
@@ -73,19 +41,14 @@ const SwapModal = ({
 }: IWalletModal) => {
   const { toggleConfirmationModal } = useTransactionFlow();
   const { library, account } = useWeb3React();
-  const { fetchPrice, runSwap } = usePriceQuery(asset, toAsset);
+  const { fetchPrice } = usePriceQuery(asset, toAsset);
   const inputRef = useRef(null);
   const outputRef = useRef(null);
-
 
   const [on, setOn] = useState<boolean>(false);
   const [inputDropDownActive, setInputDropdownActive] = useState<boolean>(false);
   const [outputDropDownActive, setOutputDropdownActive] = useState<boolean>(false);
-
-  const { allBalances, togglePending, exec, setIsOutputCurrency } = useGlobalState();
-  const [slippageAmount, setSlippageAmount] = useState(2);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [ratio, setRatio] = useState(undefined);
+  const { allBalances, setIsOutputCurrency } = useGlobalState();
   const [toggle, setToggle] = useState<boolean>(false);
 
   const getSwapPrice = useCallback(
@@ -96,9 +59,9 @@ const SwapModal = ({
          input === "inputCurrency"
            ? setOutputAmount(res.convertedOutAmount)
            : setInputAmount(res.convertedOutAmount);
-      }).catch((error) => {
-        // setInputAmount("0")
-        // setOutputAmount("0")
+      }).catch((error: Error) => {
+        console.log(error)
+        setInputAmount("")
       });
     },
     [account, library, inputAmount, outputAmount]
@@ -218,6 +181,7 @@ const SwapModal = ({
                 : "border-4 border-[#eeeaf4]"
             } mb-3`}
             onClick={() => {
+              //@ts-ignore
               inputRef.current.focus();
             }}
           >
@@ -315,7 +279,8 @@ const SwapModal = ({
                 : "border-4 border-[#eeeaf4]"
             } mb-3`}
             onClick={() => {
-              outputRef.current.focus();
+              //@ts-ignore
+              outputRef.current.focus?.();
             }}
           >
             <Input

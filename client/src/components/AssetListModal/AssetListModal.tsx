@@ -74,6 +74,7 @@ const AssetListModal = ({
                 : "border-4 border-[#eeeaf4]"
             } mb-3`}
             onClick={() => {
+              //@ts-ignore
               inputRef.current.focus();
             }}
           >

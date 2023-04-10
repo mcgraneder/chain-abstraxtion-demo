@@ -3,7 +3,7 @@ import AssetListModal from "@/components/AssetListModal/AssetListModal";
 import WalletModal from "@/components/WalletModal/WalletModal";
 import { Layout } from "@/layouts";
 import type { NextPage } from "next";
-import { AssetBaseConfig, assetsBaseConfig } from "../utils/assetsConfig";
+import { assetsBaseConfig } from "../utils/assetsConfig";
 import TransactionFlowModals from "@/components/TxConfirmationModalFlow";
 import { useWeb3React } from "@web3-react/core";
 import {
@@ -18,10 +18,10 @@ import { useGlobalState } from "@/context/GlobalState";
 import { get, post } from "@/services/axios";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import SwapModal from "@/components/SwapModal/SwapModal";
-import { AssetBaseConfig } from '@/utils/assetsConfig';
-import { ERC20ABI } from '@renproject/chains-ethereum/contracts';
-import { ethers } from 'ethers';
-import PCAKE_ROUTERABI from "../constants/ABIs/PCakeRouter.json"
+import { AssetBaseConfig } from "@/utils/assetsConfig";
+import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
+import { ethers } from "ethers";
+import PCAKE_ROUTERABI from "../constants/ABIs/PCakeRouter.json";
 import { usePriceQuery } from "@/hooks/usePriceQuery";
 
 const Home: NextPage = () => {
@@ -30,18 +30,15 @@ const Home: NextPage = () => {
   const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
   const [inputAmount, setInputAmount] = useState("");
   const [outputAmount, setOutputAmount] = useState("");
+
   const { togglePending } = useGlobalState();
   const [toAsset, setToAsset] = useState<any>(assetsBaseConfig.CAKE);
-  const [transaction, setTransaction] = useState(undefined);
-  const { fetchPrice } = usePriceQuery(asset, toAsset)
-  const assetRef = useRef(asset)
-  const toAssetRef = useRef(toAsset);
-
+  const { fetchPrice } = usePriceQuery(asset, toAsset);
 
   useEffect(() => {
-    setInputAmount("")
+    setInputAmount("");
     setOutputAmount("");
-  }, [showTokenModal])
+  }, [showTokenModal]);
 
   const dispatch = useNotification();
   const {
@@ -84,6 +81,7 @@ const Home: NextPage = () => {
         amount,
       },
     });
+    //@ts-ignore
     const { tx: swapMeta } = await fetchPrice(
       library,
       inputAmount,
@@ -107,6 +105,7 @@ const Home: NextPage = () => {
 
     await appprovalOp.wait(2);
 
+    //@ts-ignore
     const { domain, types, values } = transferTxTypedDataResponse.result;
 
     const pancakeswap = new ethers.Contract(
@@ -115,12 +114,14 @@ const Home: NextPage = () => {
       library.getSigner()
     );
 
-    const tx = await pancakeswap.populateTransaction.swapExactTokensForTokens?.(...swapMeta);
+    const tx = await pancakeswap.populateTransaction.swapExactTokensForTokens?.(
+      ...swapMeta
+    );
     const userOps = [
       // appprovalOp,
       ...values.userOps,
       {
-        to: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+        to: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",//PC_AKEROUTER
         amount: "0",
         data: tx?.data,
       },
@@ -166,8 +167,7 @@ const Home: NextPage = () => {
     }
     togglePending();
     console.log(submitRelayTxResponse);
-  }, [inputAmount, togglePending, library, account, transaction]);
-
+  }, [inputAmount, togglePending, library, account]);
 
   return (
     <Layout>

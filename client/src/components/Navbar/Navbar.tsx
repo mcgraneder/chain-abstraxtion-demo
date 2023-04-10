@@ -11,7 +11,6 @@ import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
 import Wallet from "../../../public/svgs/Wallet.svg";
 import AstralLogo from "../../../public/images/logo.svg";
 import { Wrapper, Nav, Box, BoxItemContainer } from "../CSS/Navbar.styles";
-import TokenSelectDropdown from "../ChainSelector/ChainSelector";
 import { useGlobalState } from "@/context/GlobalState";
 import Settings from "../../../public/svgs/settings.svg"
 import Global from "../../../public/svgs/global.svg"
@@ -115,7 +114,6 @@ export const Navbar = ({
               <Global className="text-[rgb(122,110,170)]" />
               <Settings className="text-[rgb(122,110,170)]" />
             </div>
-            {account ? <TokenSelectDropdown /> : null}
             <div className="mr-5 flex  h-full items-center">
               <PrimaryButton
                 className={`relative mt-[2px] ${

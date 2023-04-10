@@ -48,10 +48,7 @@ function useWallet() {
   const [pendingWallet, setPendingWallet] = useState<
     AbstractConnector | undefined
   >();
-  const [pendingChain, setPendingChain] = useState<number | undefined>(
-    undefined
-  );
-
+ 
   const toggleErrorModal = useCallback(
     () => setWalletError(undefined),
     [setWalletError]
@@ -85,7 +82,6 @@ function useWallet() {
   const disconnect = useCallback(() => {
     deactivate();
     localStorage.removeItem("provider");
-    localStorage.removeItem("authToken");
   }, [deactivate]);
 
   const activateWallet = useCallback(
@@ -123,14 +119,6 @@ function useWallet() {
     [activateWallet]
   ); //run once on page load
 
-  // const reset = useCallback((): void => {
-  //   setOpenWalletModal(false);
-  //   setConnecting(false);
-  //   setWalletError(undefined);
-  // }, []);
-
-  //run only once on mount solves bug from our call.
-  //if curious ask me and ill explain
   useEffect(() => {
     if (typeof window == "undefined") return;
     const provider = localStorage.getItem("provider");

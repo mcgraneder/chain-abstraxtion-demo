@@ -49,7 +49,7 @@ export const BoxItemContainer = styled.div`
   box-sizing: border-box;
   vertical-align: initial;
   -webkit-tap-highlight-color: transparent;
-  justify-content: ${(props) => props.allignment};
+  justify-content: ${(props: any) => props.allignment};
   display: flex;
   flex-grow: 1;
   flex-shrink: 1;

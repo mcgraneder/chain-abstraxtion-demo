@@ -49,8 +49,8 @@ const BackgroundColor = styled(Flex).attrs({
   position: relative;
   flex-direction: column;
   align-items: center;
-  z-index: ${({ index }) => index - 1};
-  padding: ${({ padding }) => padding};
+  z-index: ${({ index }: any) => index - 1};
+  padding: ${({ padding }: any) => padding};
 `;
 
 const ChildrenWrapper = styled(Container)`

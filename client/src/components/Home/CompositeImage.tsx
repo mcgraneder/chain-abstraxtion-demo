@@ -15,7 +15,7 @@ const floatingAnim = (x: string, y: string) => keyframes`
 
 const Wrapper = styled(Box)<{ maxHeight: string }>`
   position: relative;
-  max-height: ${({ maxHeight }) => maxHeight};
+  max-height: ${({ maxHeight }: any) => maxHeight};
 
   & :nth-child(2) {
     animation: ${floatingAnim("3px", "15px")} 3s ease-in-out infinite;
@@ -39,7 +39,7 @@ const Wrapper = styled(Box)<{ maxHeight: string }>`
 `;
 
 const DummyImg = styled.img<{ maxHeight: string }>`
-  max-height: ${({ maxHeight }) => maxHeight};
+  max-height: ${({ maxHeight }: any) => maxHeight};
   visibility: hidden;
 `;
 
@@ -100,12 +100,12 @@ const CompositeImage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
   return (
     <Wrapper maxHeight={maxHeight}>
       <DummyImg
-        srcSet={getSrcSet(path, attributes[0].src, ".webp")}
+        srcSet={getSrcSet(path, attributes[0]!.src, ".webp")}
         maxHeight={maxHeight}
         loading="lazy"
         decoding="async"
-        onError={(e) => {
-          const fallbackSrcSet = getSrcSet(path, attributes[0].src);
+        onError={(e: any) => {
+          const fallbackSrcSet = getSrcSet(path, attributes[0]!.src);
           if (
             e.currentTarget.srcset !== "" &&
             e.currentTarget.srcset !== fallbackSrcSet
@@ -113,7 +113,7 @@ const CompositeImage: React.FC<React.PropsWithChildren<ComponentProps>> = ({
             // eslint-disable-next-line no-param-reassign
             e.currentTarget.srcset = fallbackSrcSet;
           } else {
-            const fallbackSrc = getImageUrl(path, attributes[0].src);
+            const fallbackSrc = getImageUrl(path, attributes[0]!.src);
             if (
               e.currentTarget.srcset !== "" &&
               !e.currentTarget.src.endsWith(fallbackSrc)
