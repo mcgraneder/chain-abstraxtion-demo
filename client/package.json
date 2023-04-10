@@ -18,6 +18,7 @@
     "@pancakeswap/sdk": "^3.2.0",
     "@pancakeswap/uikit": "^0.64.0",
     "@renproject/chains": "^3.5.2",
+    "@svgr/webpack": "^7.0.0",
     "@uniswap/sdk-core": "^3.2.2",
     "@uniswap/smart-order-router": "^3.10.2",
     "@web3-react/abstract-connector": "^6.0.7",
