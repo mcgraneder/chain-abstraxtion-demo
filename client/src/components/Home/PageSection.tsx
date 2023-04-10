@@ -5,6 +5,7 @@ import { BoxProps } from "../Box/types";
 import Flex from "../Box/Flex";
 import { FlexProps } from "../Box/types";
 
+
 const Container: React.FC<React.PropsWithChildren<BoxProps>> = ({
   children,
   ...props
@@ -23,6 +24,7 @@ export type ClipFill = {
   light: string;
   dark?: string;
 };
+
 
 interface PageSectionProps extends BackgroundColorProps {
   svgFill?: string;
@@ -55,6 +57,8 @@ const ChildrenWrapper = styled(Container)`
   min-height: auto;
   padding-top: 16px;
   padding-bottom: 16px;
+
+ 
 `;
 //  ${({ theme }) => theme.mediaQueries.sm} {
 //     padding-top: 32px;
@@ -100,9 +104,11 @@ const PageSection: React.FC<React.PropsWithChildren<PageSectionProps>> = ({
 
   return (
     <Box {...containerProps}>
+      
       <BackgroundColor index={index} padding={padding} {...props}>
         <ChildrenWrapper {...innerProps}>{children}</ChildrenWrapper>
       </BackgroundColor>
+     
     </Box>
   );
 };

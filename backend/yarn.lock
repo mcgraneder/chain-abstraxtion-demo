@@ -10,6 +10,11 @@
     "@ethersproject/bignumber" "^5.2.0"
     web3 "1.7.4"
 
+"@alpaca-finance/pancake-swap-core@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@alpaca-finance/pancake-swap-core/-/pancake-swap-core-0.1.0.tgz#63c3227add2777e63fec93c170bdda102bac52f1"
+  integrity sha512-zgxHVdDEWBEEwfyHmllWxjLnUJG80YUDtLFcdS9xrwn+NozXa06m12rCUDL8yw59sUBR6SnMAugCKX3KoyPdIg==
+
 "@babel/parser@^7.20.15":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/parser/-/parser-7.21.4.tgz#94003fdfc520bbe2875d4ae557b43ddb6d880f17"

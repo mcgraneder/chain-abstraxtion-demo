@@ -12,17 +12,19 @@ interface IAssetModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
   visible: boolean;
   setAsset: React.Dispatch<React.SetStateAction<AssetBaseConfig>>;
+  setToAsset: React.Dispatch<React.SetStateAction<AssetBaseConfig>>;
 }
 
 const AssetListModal = ({
   setShowTokenModal,
   visible,
   setAsset,
+  setToAsset
 }: IAssetModal) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
     const [dropDownActive, setDropdownActive] = useState<boolean>(false);
     const inputRef = useRef(null);
-    const { allBalances } = useGlobalState()
+    const { allBalances, isOutputCurrency, setIsOutputCurrency } = useGlobalState()
 
     const handleOnBlur = useCallback(() => {
       setTimeout(() => {
@@ -43,44 +45,14 @@ const AssetListModal = ({
     );
   };
 
-//   const handleSort = (a: any, b: any) => {
-//     if (buttonState.tabName === "Deposit") {
-//       if (
-//         Number(assetBalances[a.Icon]?.walletBalance) >
-//         Number(assetBalances[b.Icon]?.walletBalance)
-//       )
-//         return -1;
-//     } else {
-//       if (
-//         Number(assetBalances[a.Icon]?.bridgeBalance) >
-//         Number(assetBalances[b.Icon]?.bridgeBalance)
-//       )
-//         return -1;
-//     }
-//     return 0;
-//   };
-
-//   const setSelectedToken = React.useCallback(
-//     (option: any, type: string) => {
-//       if (type === "currency") {
-//         setAsset(option);
-//       } else if (type === "chain" && chainType === "from") {
-//         setFromChain(option);
-//       } else if (type === "chain" && chainType === "destination") {
-//         setDestinationChain(option);
-//       }
-//       setSearchTerm("");
-//       close();
-//     },
-//     [close, setAsset, setDestinationChain, chainType, setFromChain]
-//   );
-
   const handleCurrencyChange = useCallback(
     (option: AssetBaseConfig): void => {
-      setAsset(option);
+      console.log(isOutputCurrency);
+      isOutputCurrency ? setToAsset(option) : setAsset(option);
       setShowTokenModal(false);
+      setIsOutputCurrency(false);
     },
-    [setAsset, setShowTokenModal]
+    [setAsset, setShowTokenModal, isOutputCurrency]
   );
 
   return (

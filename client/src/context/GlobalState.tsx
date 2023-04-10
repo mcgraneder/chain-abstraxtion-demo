@@ -27,6 +27,8 @@ type GlobalContextType = {
   exec: (execute: () => void) => void;
   openWalletModal: boolean;
   toggleWalletModal: () => void;
+  setIsOutputCurrency: React.Dispatch<React.SetStateAction<boolean>>;
+  isOutputCurrency: boolean;
 };
 
 export type MulticallReturn = {
@@ -49,11 +51,12 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
   const [fetchingBalances, setFetchingBalances] = useState<boolean>(false)
   const [pending, setPending] = useState<boolean>(false);
    const [openWalletModal, setOpenWalletModal] = useState<boolean>(false);
-
+  const [isOutputCurrency, setIsOutputCurrency] = useState<boolean>(false)
    const toggleWalletModal = useCallback(
      () => setOpenWalletModal((w) => !w),
      [setOpenWalletModal]
    );
+
  
   const [allBalances, setAllBalances] = useState<{
     [chain: string]: { [x: string]: MulticallReturn };
@@ -108,7 +111,9 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
         fetchingBalances,
         exec,
         openWalletModal,
-        toggleWalletModal
+        toggleWalletModal,
+        isOutputCurrency,
+        setIsOutputCurrency
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import AssetListModal from "@/components/AssetListModal/AssetListModal";
 import WalletModal from "@/components/WalletModal/WalletModal";
 import { Layout } from "@/layouts";
@@ -18,13 +18,30 @@ import { useGlobalState } from "@/context/GlobalState";
 import { get, post } from "@/services/axios";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import SwapModal from "@/components/SwapModal/SwapModal";
+import { AssetBaseConfig } from '@/utils/assetsConfig';
+import { ERC20ABI } from '@renproject/chains-ethereum/contracts';
+import { ethers } from 'ethers';
+import PCAKE_ROUTERABI from "../constants/ABIs/PCakeRouter.json"
+import { usePriceQuery } from "@/hooks/usePriceQuery";
 
 const Home: NextPage = () => {
   const { library, account, chainId } = useWeb3React();
   const [showTokenModal, setShowTokenModal] = useState<boolean>(false);
   const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
-  const [value, setValue] = useState<string>("");
+  const [inputAmount, setInputAmount] = useState("");
+  const [outputAmount, setOutputAmount] = useState("");
   const { togglePending } = useGlobalState();
+  const [toAsset, setToAsset] = useState<any>(assetsBaseConfig.CAKE);
+  const [transaction, setTransaction] = useState(undefined);
+  const { fetchPrice } = usePriceQuery(asset, toAsset)
+  const assetRef = useRef(asset)
+  const toAssetRef = useRef(toAsset);
+
+
+  useEffect(() => {
+    setInputAmount("")
+    setOutputAmount("");
+  }, [showTokenModal])
 
   const dispatch = useNotification();
   const {
@@ -48,28 +65,66 @@ const Home: NextPage = () => {
       success: true,
     });
   };
+
   const executeTx = useCallback(async () => {
     if (!library || !account) return;
     toggleConfirmationModal();
     togglePendingModal();
     const tokenAddress = asset.address;
     const chainID = asset.chainId;
-    const transferTxTypedDataResponse = await get(
-      API.backend.approvalTxTypedData,
-      {
-        params: {
-          chainID,
-          sigChainID: chainId,
-          token: tokenAddress,
-          from: account,
-          to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
-          amount: new BigNumber(value).shiftedBy(asset.decimals).toFixed(),
-        },
-      }
+    const amount = new BigNumber(inputAmount)
+      .shiftedBy(asset.decimals)
+      .toFixed();
+    const transferTxTypedDataResponse = await get(API.backend.SwapTxTypedData, {
+      params: {
+        chainID,
+        sigChainID: chainId,
+        token: tokenAddress,
+        from: account,
+        amount,
+      },
+    });
+    const { tx: swapMeta } = await fetchPrice(
+      library,
+      inputAmount,
+      account!,
+      asset,
+      toAsset,
+      "inputCurrency"
     );
     if (!transferTxTypedDataResponse) throw new Error("ErrorCodes.apiFailed");
 
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      library.getSigner()
+    ) as ethers.Contract;
+    const appprovalOp = await tokenContract
+      .connect(library.getSigner())
+      .approve?.("0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532", amount, {
+        gasLimit: 2000000,
+      });
+
+    await appprovalOp.wait(2);
+
     const { domain, types, values } = transferTxTypedDataResponse.result;
+
+    const pancakeswap = new ethers.Contract(
+      "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+      PCAKE_ROUTERABI,
+      library.getSigner()
+    );
+
+    const tx = await pancakeswap.populateTransaction.swapExactTokensForTokens?.(...swapMeta);
+    const userOps = [
+      // appprovalOp,
+      ...values.userOps,
+      {
+        to: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1",
+        amount: "0",
+        data: tx?.data,
+      },
+    ];
     let signature;
     try {
       const signatureBase = await library
@@ -87,8 +142,8 @@ const Home: NextPage = () => {
       toggleRejectedModal();
     }
     const submitRelayTxResponse = await post(API.backend.submitRelayTx, {
-      forwardRequest: values.userOps,
-      forwarderAddress: "0x91E49AF5Eccb8AD8fbfd0A7A218Dae7f71178aa2",
+      forwardRequest: userOps,
+      forwarderAddress: "0xc82993eFc2B02bC4Df602D6De1cb70aC90b4DED2",
       signature,
       from: account!,
     });
@@ -111,26 +166,31 @@ const Home: NextPage = () => {
     }
     togglePending();
     console.log(submitRelayTxResponse);
-  }, [value, togglePending]);
+  }, [inputAmount, togglePending, library, account, transaction]);
+
 
   return (
     <Layout>
       <TransactionFlowModals
         asset={asset}
         buttonState={"Approval"}
-        text={value}
+        text={inputAmount}
         executeTx={executeTx}
       />
       <AssetListModal
         setShowTokenModal={setShowTokenModal}
         visible={showTokenModal}
         setAsset={setAsset}
+        setToAsset={setToAsset}
       />
       <SwapModal
         setShowTokenModal={setShowTokenModal}
         asset={asset}
-        value={value}
-        setValue={setValue}
+        inputAmount={inputAmount}
+        setInputAmount={setInputAmount}
+        outputAmount={outputAmount}
+        setOutputAmount={setOutputAmount}
+        toAsset={toAsset}
       />
     </Layout>
   );

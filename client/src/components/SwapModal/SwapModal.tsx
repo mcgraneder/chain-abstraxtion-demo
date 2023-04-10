@@ -25,12 +25,21 @@ import {
   useNotification,
 } from "@/context/useNotificationState";
 import { useTransactionFlow } from "@/context/useTransactionFlowState";
+import { usePriceQuery } from "@/hooks/usePriceQuery";
+
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
   asset: AssetBaseConfig;
-  value: string;
-  setValue: any;
+  inputAmount: string;
+  setInputAmount: any;
+  outputAmount: string;
+  setOutputAmount: any;
+  toAsset: AssetBaseConfig;
+  transaction: any;
+  setTransaction: any;
+  executeTx: () => Promise<void>;
+  toggleSwap: () => void;
 }
 
 interface Tabs {
@@ -56,21 +65,83 @@ const TABS: Tabs[] = [
 const SwapModal = ({
   setShowTokenModal,
   asset,
-  value,
-  setValue,
+  inputAmount,
+  setInputAmount,
+  outputAmount,
+  setOutputAmount,
+  toAsset,
 }: IWalletModal) => {
   const { toggleConfirmationModal } = useTransactionFlow();
-  const [on, setOn] = useState<boolean>(false)
-  const [dropDownActive, setDropdownActive] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const { library, account } = useWeb3React();
+  const { fetchPrice, runSwap } = usePriceQuery(asset, toAsset);
   const inputRef = useRef(null);
-  const { allBalances, togglePending, exec } = useGlobalState();
+  const outputRef = useRef(null);
 
-  const handleOnBlur = useCallback(() => {
+
+  const [on, setOn] = useState<boolean>(false);
+  const [inputDropDownActive, setInputDropdownActive] = useState<boolean>(false);
+  const [outputDropDownActive, setOutputDropdownActive] = useState<boolean>(false);
+
+  const { allBalances, togglePending, exec, setIsOutputCurrency } = useGlobalState();
+  const [slippageAmount, setSlippageAmount] = useState(2);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [ratio, setRatio] = useState(undefined);
+  const [toggle, setToggle] = useState<boolean>(false);
+
+  const getSwapPrice = useCallback(
+   async (inputAmount: any, input: string) => {
+      if (!library) return;
+
+      await fetchPrice(library, inputAmount, account!, asset, toAsset, input).then((res: any) => {
+         input === "inputCurrency"
+           ? setOutputAmount(res.convertedOutAmount)
+           : setInputAmount(res.convertedOutAmount);
+      }).catch((error) => {
+        // setInputAmount("0")
+        // setOutputAmount("0")
+      });
+    },
+    [account, library, inputAmount, outputAmount]
+  );
+
+  const onChange = useCallback(
+    (v: string, input: string) => {
+      let tokenValue: number | string = v;
+      console.log(tokenValue)
+       if (inputAmount === '' || inputAmount === "0" && inputDropDownActive) {
+         setOutputAmount("0");
+       } else if (outputAmount === "" || outputAmount === "0" && !inputDropDownActive) {
+         setInputAmount("0");
+         return
+       }
+      input === "inputCurrency"
+        ? setInputAmount(tokenValue)
+        : setOutputAmount(tokenValue);
+      getSwapPrice(tokenValue, input);
+    },
+    [getSwapPrice, inputAmount, outputAmount, inputDropDownActive, toAsset, asset]
+  );
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    input: string
+  ) => {
+    e.preventDefault();
+    const inputAmount: string = e.target.value;
+    onChange(inputAmount, input);
+  };
+
+  const handleInputOnBlur = useCallback(() => {
     setTimeout(() => {
-      setDropdownActive(false);
-    }, 500);
+      setInputDropdownActive(false);
+    }, 50);
   }, []);
+
+    const handleOutputOnBlur = useCallback(() => {
+      setTimeout(() => {
+        setOutputDropdownActive(false);
+      }, 50);
+    }, []);
 
   const onMaxClick = (percent: number) => {
     const inputOverride = formatBalancePercent(
@@ -78,7 +149,7 @@ const SwapModal = ({
       asset.decimals,
       percent / 10
     );
-    setValue(inputOverride);
+    setInputAmount(inputOverride);
   };
   return (
     <div className="mt-[100px]">
@@ -102,11 +173,15 @@ const SwapModal = ({
             >
               <div className="h-6 w-6">
                 <AssetIcon
-                  chainName={asset.Icon as string}
+                  chainName={
+                    !toggle ? (asset.Icon as string) : (toAsset.Icon as string)
+                  }
                   className="h-6 w-6"
                 />
               </div>
-              <span className="#280d5f font-[900]">{asset.shortName}</span>
+              <span className="#280d5f font-[900]">
+                {!toggle ? asset.shortName : toAsset.shortName}
+              </span>
               <div className={`flex h-6 w-6 items-center`}>
                 <UilAngleDown className="h-6 w-6 font-[900]" />
               </div>
@@ -114,10 +189,19 @@ const SwapModal = ({
             <div>
               {allBalances["BinanceSmartChain"] ? (
                 <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  {`balance ${formatBalance(
-                    allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-                    asset.decimals
-                  )} tBNB`}
+                  {`balance ${
+                    !toggle
+                      ? formatBalance(
+                          allBalances[asset.chain]![asset.shortName]
+                            ?.walletBalance!,
+                          asset.decimals
+                        )
+                      : formatBalance(
+                          allBalances[toAsset.chain]![toAsset.shortName]
+                            ?.walletBalance!,
+                          toAsset.decimals
+                        )
+                  }} tBNB`}
                 </span>
               ) : (
                 <span className="text-[15px] font-[600] text-[#7a6eaa]">
@@ -129,7 +213,7 @@ const SwapModal = ({
           </div>
           <div
             className={`my-1 flex h-[120px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
-              dropDownActive
+              inputDropDownActive
                 ? "border-4 border-purple-500"
                 : "border-4 border-[#eeeaf4]"
             } mb-3`}
@@ -140,10 +224,12 @@ const SwapModal = ({
             <Input
               ref={inputRef}
               type="number"
-              value={value}
-              onChange={(e: any) => setValue(e.currentTarget.value)}
-              onFocus={() => setDropdownActive(true)}
-              onBlur={handleOnBlur}
+              value={toggle ? outputAmount : inputAmount}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange(e, toggle ? "outputCurrency" : "inputCurrency")
+              }
+              onFocus={() => setInputDropdownActive(true)}
+              onBlur={handleInputOnBlur}
             />
             <div className="flex items-center justify-end gap-2">
               {[25, 50, 75, 100].map((percent: number) => {
@@ -165,6 +251,7 @@ const SwapModal = ({
               className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#eeeaf4] hover:cursor-pointer hover:bg-[#1fc7d4]"
               onMouseEnter={() => setOn(true)}
               onMouseLeave={() => setOn(false)}
+              onClick={() => setToggle(!toggle)}
             >
               {on ? (
                 <UilExchange className="h-8 w-8 font-[900] text-white" />
@@ -176,15 +263,22 @@ const SwapModal = ({
           <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
             <div
               className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
-              onClick={() => setShowTokenModal(true)}
+              onClick={() => {
+                setShowTokenModal(true);
+                setIsOutputCurrency(true);
+              }}
             >
               <div className="h-6 w-6">
                 <AssetIcon
-                  chainName={asset.Icon as string}
+                  chainName={
+                    !toggle ? (toAsset.Icon as string) : (asset.Icon as string)
+                  }
                   className="h-6 w-6"
                 />
               </div>
-              <span className="#280d5f font-[900]">{asset.shortName}</span>
+              <span className="#280d5f font-[900]">
+                {!toggle ? toAsset.shortName : (asset.Icon as string)}
+              </span>
               <div className={`flex h-6 w-6 items-center`}>
                 <UilAngleDown className="h-6 w-6 font-[900]" />
               </div>
@@ -192,10 +286,19 @@ const SwapModal = ({
             <div>
               {allBalances["BinanceSmartChain"] ? (
                 <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  {`balance ${formatBalance(
-                    allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-                    asset.decimals
-                  )} tBNB`}
+                  {`balance ${
+                    !toggle
+                      ? formatBalance(
+                          allBalances[asset.chain]![toAsset.shortName]
+                            ?.walletBalance!,
+                          toAsset.decimals
+                        )
+                      : formatBalance(
+                          allBalances[asset.chain]![toAsset.shortName]
+                            ?.walletBalance!,
+                          toAsset.decimals
+                        )
+                  } tBNB`}
                 </span>
               ) : (
                 <span className="text-[15px] font-[600] text-[#7a6eaa]">
@@ -207,21 +310,23 @@ const SwapModal = ({
           </div>
           <div
             className={`my-1 flex h-[90px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
-              dropDownActive
+              outputDropDownActive
                 ? "border-4 border-purple-500"
                 : "border-4 border-[#eeeaf4]"
             } mb-3`}
             onClick={() => {
-              inputRef.current.focus();
+              outputRef.current.focus();
             }}
           >
             <Input
-              ref={inputRef}
+              ref={outputRef}
               type="number"
-              value={value}
-              onChange={(e: any) => setValue(e.currentTarget.value)}
-              onFocus={() => setDropdownActive(true)}
-              onBlur={handleOnBlur}
+              value={toggle ? inputAmount : outputAmount}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange(e, toggle ? "inputCurrency" : "outputCurrency")
+              }
+              onFocus={() => setOutputDropdownActive(true)}
+              onBlur={handleOutputOnBlur}
             />
           </div>
 
