@@ -1,12 +1,22 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { ERC20__factory } from '../../../../backend/typechain-types/factories/@openzeppelin/contracts/token/ERC20/ERC20__factory';
 import { Staking__factory } from '../../../../backend/typechain-types/factories/contracts/Deposit.sol/Staking__factory';
-import { UserOp } from '../../../../backend/api/app';
 import { Wallet, ethers } from "ethers";
 import { Forwarder__factory } from "../../../../backend/typechain-types";
 
  const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545/");
 
+ export interface UserOp {
+  to: string;
+  amount: string;
+  data: string;
+}
+
+export interface Transaction {
+  userOps: UserOp[];
+  chainID: number;
+  signature: string;
+}
 const getMetaTxTypedData = async (
   userOps: UserOp[],
   sigChainID: number,

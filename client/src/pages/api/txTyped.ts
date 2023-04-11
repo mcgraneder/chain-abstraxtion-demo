@@ -2,12 +2,22 @@ import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
 import FORWARDER_ABI from "../../constants/ABIs/ForwarderABI.json";
 import DEPOSITOR_ABI from "../../constants/ABIs/Depositer.json";
 
-import { UserOp } from '../../../../backend/api/app';
 import { Wallet, ethers } from "ethers";
 import { ERC20ABI } from '@renproject/chains-ethereum/contracts';
 
  const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545/");
 
+ export interface UserOp {
+   to: string;
+   amount: string;
+   data: string;
+ }
+
+ export interface Transaction {
+   userOps: UserOp[];
+   chainID: number;
+   signature: string;
+ }
 const getMetaTxTypedData = async (
   userOps: any,
   sigChainID: number,
