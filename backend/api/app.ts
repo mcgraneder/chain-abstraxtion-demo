@@ -7,7 +7,7 @@ import {
   Polygon,
   Kava,
   Moonbeam,
-} from "@renproject/chains-ethereum";
+} from "@renproject/chains";
 
 
 import { RenJS } from "@renproject/ren";
