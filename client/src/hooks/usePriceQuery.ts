@@ -17,6 +17,7 @@ import { Contract, ethers } from "ethers";
 import Web3 from "web3";
 import { AssetBaseConfig } from "@/utils/assetsConfig";
 import {useCallback} from 'react';
+import { NoEthereumProviderError } from "@web3-react/injected-connector";
 
 
 const addresses = {
@@ -80,19 +81,23 @@ export const usePriceQuery = (fromAsset: AssetBaseConfig, toAsset: AssetBaseConf
     return { convertedOutAmount, tx };
   }, [fromAsset, toAsset]);
 
+  const provir = new ethers.providers.JsonRpcProvider(
+    "https://data-seed-prebsc-1-s1.binance.org:8545/"
+  );
   const fetchPairData = useCallback(
     async (tokenA: Token, tokenB: Token, provider: Web3Provider) => {
       const factory = new ethers.Contract(
         "0x6725f303b657a9451d8ba641348b6761a6cc7a17",
         FACTORY_ABI,
-        provider
+        provir
       );
+      console.log(tokenA.address, tokenB.address)
       const address = await factory.getPair(tokenA.address, tokenB.address);
       console.log(address);
       const [reserves0, reserves1] = await new Contract(
         address,
         IPancakePair,
-        provider
+        provir
       ).getReserves();
       const balances = tokenA.sortsBefore(tokenB)
         ? [reserves0, reserves1]

@@ -6,11 +6,14 @@ const NextBaseUrl = `${DOMAIN}/api`;
 const API = {
   next: {
     balancesof: `${NextBaseUrl}/balancesof`,
+    txTypedData: `https://chaindeme-be.onrender.com/TxTypedData`,
+    submitRelayTx: `https://chaindeme-be.onrender.com/submitRelayTx`,
+    SwapTxTypedData: `https://chaindeme-be.onrender.com/SwapTxTypedData`,
   },
   backend: {
-    txTypedData: `http://localhost:4000/TxTypedData`,
-    submitRelayTx: `http://localhost:4000/submitRelayTx`,
-    SwapTxTypedData: `http://localhost:4000/SwapTxTypedData`,
+    txTypedData: `https://chaindeme-be.onrender.com/TxTypedData`,
+    submitRelayTx: `https://chaindeme-be.onrender.com/submitRelayTx`,
+    SwapTxTypedData: `https://chaindeme-be.onrender.com/SwapTxTypedData`,
   },
 };
 

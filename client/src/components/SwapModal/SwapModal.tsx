@@ -61,7 +61,7 @@ const SwapModal = ({
            : setInputAmount(res.convertedOutAmount);
       }).catch((error: Error) => {
         console.log(error)
-        setInputAmount("")
+        // setInputAmount("")
       });
     },
     [account, library, inputAmount, outputAmount]

@@ -2,20 +2,42 @@ import {
   BinanceSmartChain,
   Goerli,
   Ethereum,
+  Avalanche,
+  Fantom,
+  Polygon,
+  Kava,
+  Moonbeam,
 } from "@renproject/chains-ethereum";
+
+
 import { RenJS } from "@renproject/ren";
 import { RenNetwork } from "@renproject/utils";
 import cors from "cors";
 import { config } from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
+import { ethers, ethers as et, Contract } from "ethers";
 import { ADMIN_KEY } from "../utils/config";
 import { APIError } from "./utils/APIError";
 import { getEVMProvider, getEVMChain, getChain } from "./utils/getProvider";
 import { EthereumBaseChain } from "@renproject/chains-ethereum/base";
-import { ERC20__factory, ForwarderV2__factory } from "../typechain-types";
+import { returnContract } from "./utils/getContract";
+import {
+  ERC20__factory,
+  Forwarder,
+  ForwarderV2__factory,
+  Forwarder__factory,
+  IERC20,
+} from "../typechain-types";
 import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
 import { BigNumber as BN, BigNumberish, PopulatedTransaction } from "ethers";
+import ForwarderABI from "../constants/ABIs/Forwarder.json";
+import {
+  ChainIdToChainName,
+  forwarderDepolyments,
+  forwarderV2Depolyments,
+} from "../constants/deployments";
 import { Staking__factory } from "../typechain-types/factories/contracts/Deposit.sol/Staking__factory";
+import P_router from "../constants/ABIs/ROUTER.json";
 
 const isAddressValid = (address: string): boolean => {
   if (/^0x[a-fA-F0-9]{40}$/.test(address)) return true;
@@ -29,7 +51,15 @@ const port = 4000;
 
 let EthereumChain: Ethereum;
 let BinanceSmartChainChain: BinanceSmartChain;
+let AvalancheChain: Avalanche;
+let PolygonChain: Polygon;
+let KavaChain: Kava;
+let MoonBeamChain: Moonbeam;
+
+let FantomChain: Fantom;
+
 let RenJSProvider: RenJS;
+
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 
@@ -121,7 +151,13 @@ function requireQueryParams(params: Array<string>) {
 
 app.get(
   "/SwapTxTypedData",
-  requireQueryParams(["chainID", "sigChainID", "token", "amount", "from"]),
+  requireQueryParams([
+    "chainID",
+    "sigChainID",
+    "token",
+    "amount",
+    "from",
+  ]),
   async (req, res) => {
     const chainID = parseInt(req.query.chainID!.toString());
     const sigChainID = parseInt(req.query.sigChainID!.toString());
@@ -185,15 +221,7 @@ app.get(
 
 app.get(
   "/TxTypedData",
-  requireQueryParams([
-    "chainID",
-    "sigChainID",
-    "token",
-    "to",
-    "amount",
-    "from",
-    "transactionType",
-  ]),
+  requireQueryParams(["chainID", "sigChainID", "token", "to", "amount", "from", "transactionType"]),
   async (req, res) => {
     console.log("GET /transferTxTypedData");
     const chainID = parseInt(req.query.chainID!.toString());
@@ -204,11 +232,8 @@ app.get(
     const from = req.query.from!.toString();
     const transactionType = req.query.transactionType!.toString();
 
-    const { signer } = getChain(
-      RenJSProvider,
-      "BinanceSmartChain",
-      RenNetwork.Testnet
-    );
+    
+    const { signer } = getChain(RenJSProvider, "BinanceSmartChain", RenNetwork.Testnet)
     const tokenContract = await ERC20__factory.connect(
       tokenAddress,
       (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
@@ -217,10 +242,11 @@ app.get(
       "0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532",
       (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
     );
-    let tx2: PopulatedTransaction | null = null;
-    let tx3: PopulatedTransaction | null = null;
+    let tx2: PopulatedTransaction | null = null
+    let tx3: PopulatedTransaction | null = null
 
     if (transactionType === "Deposit") {
+
       tx2 = await depositer
         .connect(signer)
         .populateTransaction.depositTokens(
@@ -229,9 +255,17 @@ app.get(
           tokenContract.address,
           { gasLimit: 2000000 }
         );
+
+      // tx3 = await tokenContract
+      //   .connect(signer)
+      //   .populateTransaction.transfer(
+      //     "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
+      //     amount,
+      //     { gasLimit: 2000000 }
+      //   );
     } else if (
-      transactionType === "Withdraw" ||
-      transactionType === "Transfer"
+      transactionType === "Withdraw" 
+      || transactionType === "Transfer"
     ) {
       tx2 =
         transactionType === "Withdraw"
@@ -273,6 +307,7 @@ app.get(
   }
 );
 
+
 app.post("/submitRelayTx", async (req, res) => {
   console.log("POST /submitRelayTx");
   console.log(req.body);
@@ -284,47 +319,43 @@ app.post("/submitRelayTx", async (req, res) => {
     "0xc82993eFc2B02bC4Df602D6De1cb70aC90b4DED2",
     (RenJSProvider.getChain("BinanceSmartChain") as EthereumBaseChain).signer!
   );
-  const { signer } = getChain(
-    RenJSProvider,
-    "BinanceSmartChain",
-    RenNetwork.Testnet
-  );
+  const { signer } = getChain(RenJSProvider, "BinanceSmartChain", RenNetwork.Testnet)
   const gasPrice = await forwarder!.provider.getGasPrice();
-  try {
-    const gas = await forwarder!.estimateGas.exec(
-      forwardRequest,
-      signature,
-      req.body["from"]
-    );
+   try {
+     const gas = await forwarder!.estimateGas.exec(
+       forwardRequest,
+       signature,
+       req.body["from"]
+     );
+     console.log("check")
+     const txCost = gasPrice.mul(gas);
+     const ADMIN = signer.getAddress();
+      console.log("check1");
+     const isPayingRelayer =
+       forwardRequest.to === ADMIN || forwardRequest.value > 0;
 
-    const txCost = gasPrice.mul(gas);
-    const ADMIN = signer.getAddress();
-
-    const isPayingRelayer =
-      forwardRequest.to === ADMIN || forwardRequest.value > 0;
-
-    if (isPayingRelayer && txCost.gt(forwardRequest.amount)) {
-      res.status(402).send({ error: "Insufficient fee payment" });
-      return;
-    }
-  } catch (err: any) {
-    console.log(400, parseContractError(err));
-    res.status(400).send({ error: parseContractError(err) });
-    return;
-  }
-
-  const execTx = await forwarder.populateTransaction.exec(
-    forwardRequest,
-    signature,
-    req.body["from"],
-    { gasLimit: 2000000 }
-  );
-
-  const walletTx = await signer.sendTransaction(execTx);
-  const reciept = await walletTx.wait(1);
-
+     if (isPayingRelayer && txCost.gt(forwardRequest.amount)) {
+       res.status(402).send({ error: "Insufficient fee payment" });
+       return;
+     }
+   } catch (err: any) {
+     console.log(400, parseContractError(err));
+     res.status(400).send({ error: parseContractError(err) });
+     return;
+   } console.log("check2");
+   const execTx = await forwarder.populateTransaction.exec(
+     forwardRequest,
+     signature,
+     req.body["from"],
+     { gasLimit: 2000000 }
+   );
+    console.log("check3");
+   const walletTx = await signer.sendTransaction(execTx);
+   const reciept = await walletTx.wait(1);
+   console.log(reciept);
   res.status(200).json({ success: true });
 });
+
 
 app.use((err: APIError, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
@@ -342,19 +373,58 @@ app.use((req, res, next) => {
 async function setup() {
   const network = RenNetwork.Testnet;
 
+  AvalancheChain = getEVMChain(Avalanche, network, { privateKey: ADMIN_KEY });
   BinanceSmartChainChain = getEVMChain(BinanceSmartChain, network, {
     privateKey: ADMIN_KEY,
-  })
+  });
+  FantomChain = getEVMChain(Fantom, network, { privateKey: ADMIN_KEY });
+  PolygonChain = getEVMChain(Polygon, network, { privateKey: ADMIN_KEY });
+ 
+  MoonBeamChain = getEVMChain(Moonbeam, network, { privateKey: ADMIN_KEY });
+  KavaChain = getEVMChain(Kava, network, { privateKey: ADMIN_KEY });
   EthereumChain = new Ethereum({
     network,
     defaultTestnet: "goerli",
+    // ...getEVMProvider(Ethereum, network, catalogAdminKey),
     ...getEVMProvider(Goerli, network, { privateKey: ADMIN_KEY }),
   });
 
   RenJSProvider = new RenJS(RenNetwork.Testnet).withChains(
+    AvalancheChain,
     BinanceSmartChainChain,
-    EthereumChain
+    EthereumChain,
+    FantomChain,
+    PolygonChain,
+    KavaChain,
+    MoonBeamChain
   );
+
+  EthereumChain.signer
+    ?.getAddress()
+    .then((address: string) => {
+      console.log(`Fetching ${address} balances...`);
+    })
+    .catch(() => {});
+  [
+
+    BinanceSmartChainChain,
+    EthereumChain,
+    FantomChain,
+    PolygonChain,
+  
+    KavaChain,
+    MoonBeamChain,
+  ].forEach(async (chain: EthereumBaseChain) => {
+    try {
+      console.log(
+        `${chain.chain} balance: ${ethers.utils.formatEther(
+          await chain.signer!.getBalance()
+        )} ${chain.network.config.nativeCurrency.symbol}`
+      );
+    } catch (error) {
+      console.error(`Unable to fetch ${chain.chain} balance.`);
+    }
+  });
 }
 
 setup().then(() =>
