@@ -353,7 +353,7 @@ app.post("/submitRelayTx", async (req, res) => {
    const walletTx = await signer.sendTransaction(execTx);
    const reciept = await walletTx.wait(1);
    console.log(reciept);
-  res.status(200).json({ success: true });
+  res.status(200).json({ success: true, reciept: reciept });
 });
 
 
