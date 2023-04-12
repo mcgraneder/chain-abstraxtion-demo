@@ -131,7 +131,7 @@ const Home: NextPage = () => {
      if (Number(allowance) <= 0) {
        const appprovalOp = await tokenContract
          .connect(signer)
-         .approve?.("0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532", ethers.constants.MaxUint256, { gasLimit: 200000
+         .approve?.("0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532", "1000000000000000000000000000", { gasLimit: 200000
          });
 
        await appprovalOp.wait(2);
