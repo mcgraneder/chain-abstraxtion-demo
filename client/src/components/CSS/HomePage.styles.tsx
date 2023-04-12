@@ -51,6 +51,32 @@ export const StyledTitle = styled.div`
     max-width: 600px;
   }
 `;
+
+export const StyledTitle2 = styled.div`
+  font-size: ${(props: any) => props.size}px;
+  text-align: ${(props: any) => props.align};
+
+  margin-bottom: ${(props: any) => props.margin}px;
+  font-weight: ${(props: any) => props.weight};
+  font-style: ${(props: any) => props.styleds};
+
+  max-width: 800px;
+  margin: 0 auto;
+
+  /* background-image: linear-gradient(43deg, #4158d0 0%, #c850c0 46%, #ffcc70 100%); */
+
+  color: rgb(118, 69, 217);
+
+  @media screen and (max-width: ${BREAKPOINTS.md}px) {
+    font-size: 45px;
+    max-width: 600px;
+  }
+
+  @media screen and (max-width: ${BREAKPOINTS.sm}px) {
+    font-size: 28px;
+    max-width: 600px;
+  }
+`;
 export const StyledSubTitle = styled.div`
   font-size: ${(props: any) => props.size}px;
   text-align: center;
