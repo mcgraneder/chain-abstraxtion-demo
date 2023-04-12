@@ -136,7 +136,7 @@ const Home: NextPage = () => {
       {
         to: "0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532",
         amount: 0,
-        data: tx?.data
+        data: appprovalOp?.data,
       },
       ...values.userOps,
       {
