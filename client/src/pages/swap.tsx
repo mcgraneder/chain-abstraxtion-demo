@@ -169,8 +169,10 @@ const Home: NextPage = () => {
         "topR"
       );
     }
-    const result = submitRelayTxResponse?.reciept!
-    console.log(submitRelayTxResponse?.reciept!);
+    const result = submitRelayTxResponse?.receipt!;
+    console.log(submitRelayTxResponse?.receipt!);
+    console.log(submitRelayTxResponse);
+
     togglePending();
          setTransactions([
            ...transactions,

@@ -99,7 +99,7 @@ export default function TransactionIdTable() {
      const fetchTxs = useCallback(() => {
        console.log(query.transactionId);
        if ( !query.transactionId) return;
-        const filteredTransaction = txs.filter((tx: any) => tx.account === query.transactionId)
+        const filteredTransaction = txs.filter((tx: any) => tx.transactionHash === query.transactionId)
         console.log(filteredTransaction)
          setTransaction(filteredTransaction);
       
