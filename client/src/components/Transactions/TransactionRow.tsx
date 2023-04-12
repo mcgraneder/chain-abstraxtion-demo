@@ -52,7 +52,7 @@ const TransactionRow = (data: any) => {
   const shortenedAddress = shortenAddress(data.transactionHash, 17);
   return (
     <StyledTokenRow
-      href={`/history/${data.account}`}
+      href={`/history/${data.transactionHash}`}
       className={"hover:bg-[#f6f3f9]"}
     >
       <div className="flex items-center gap-2 text-blue-600">
