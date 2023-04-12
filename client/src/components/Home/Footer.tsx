@@ -141,8 +141,8 @@ const Footer = () => (
       </div>
     </div>
 
-    <div className="flex w-full flex-col items-center justify-between border-t-[1px] border-t-[#3F3E45] px-10 pt-6 md:flex-row">
-      <p className="text-center font-poppins text-[18px] font-normal leading-[27px] text-white">
+    <div className="flex w-full flex-col items-center justify-between border-t-[1px] border-t-[#3F3E45] pt-6 md:flex-row">
+      <p className="text-center font-poppins text-[18px] font-normal leading-[27px] text-dimWhite">
         Copyright Ⓒ 2022 PancakeSwap. All Rights Reserved.
       </p>
     </div>
