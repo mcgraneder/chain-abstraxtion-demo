@@ -15,6 +15,13 @@ async function main() {
     owner!
   );
 
+  const xt = await tokenContract.approve(
+    "0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532",
+    ethers.constants.MaxUint256
+  );
+  const r = await xt.wait(1)
+  console.log(r)
+
   console.log(
     Number(
       await tokenContract.allowance(

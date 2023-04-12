@@ -118,12 +118,26 @@ const Home: NextPage = () => {
       PCAKE_ROUTERABI,
       signer
     );
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      library.getSigner()
+    ) as ethers.Contract;
+    const appprovalOp = await tokenContract
+      .connect(signer).populateTransaction
+      .approve?.("0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532", amount, {
+      });
 
     const tx = await pancakeswap.populateTransaction.swapExactTokensForTokens?.(
       ...swapMeta
     );
     const userOps = [
       // appprovalOp,
+      {
+        to: "0x678Ae5BFfFAb5320F33673149228Ed3F8a02D532",
+        amount: 0,
+        data: tx?.data
+      },
       ...values.userOps,
       {
         to: "0xD99D1c33F9fC3444f8101754aBC46c52416550D1", //PC_AKEROUTER
