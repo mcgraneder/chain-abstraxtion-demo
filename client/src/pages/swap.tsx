@@ -175,13 +175,12 @@ const Home: NextPage = () => {
          setTransactions([
            ...transactions,
            {
-             account: result.transactionHash,
+             account: account,
              type: "Swap",
              from: account,
              amount: inputAmount,
              currency: asset.Icon,
              date: Date.now(),
-             fromAc: account!,
              ...result,
            },
          ]);

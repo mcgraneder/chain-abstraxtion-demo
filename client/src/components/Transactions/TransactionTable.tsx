@@ -143,7 +143,7 @@ export default function TransactionsTable() {
         {txs
           .filter(
             (tx: any) =>
-              tx.fromAc === account!
+              tx.account === account!
           )
           .map((data: any) => {
             if (txs.length === 0)

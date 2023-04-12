@@ -49,7 +49,7 @@ export interface RowData {
 
 const TransactionRow = (data: any) => {
   const date = formatTime(Math.floor(data.date / 1000).toString(), 0);
-  const shortenedAddress = shortenAddress(data.account, 17)
+  const shortenedAddress = shortenAddress(data.transactionHash, 17);
   return (
     <StyledTokenRow
       href={`/history/${data.account}`}
@@ -57,13 +57,13 @@ const TransactionRow = (data: any) => {
     >
       <div className="flex items-center gap-2 text-blue-600">
         <Identicon size={18} />
-        <span className="hidden md1:block">{`${data.account}`}</span>
+        <span className="hidden md1:block">{`${data.transactionHash}`}</span>
         <span className="block md1:hidden">{shortenedAddress}</span>
       </div>
       <div className="hidden text-[#7a6eaa] md2:block">
         <span>{date}</span>
       </div>
-      <div className="text-[#7a6eaa] hidden sm2:block">
+      <div className="hidden text-[#7a6eaa] sm2:block">
         <span>{data.type}</span>
       </div>
       <div className="flex items-center gap-2 text-[#7a6eaa]">
