@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { BridgeModalContainer, Input } from "../CSS/Wallet.styles";
+import { AddressInput, BridgeModalContainer, Input } from "../CSS/Wallet.styles";
 import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
 import { UilAngleDown, UilSpinnerAlt } from '@iconscout/react-unicons';
 import { useGlobalState } from "@/context/GlobalState";
@@ -20,6 +20,7 @@ import {
   useNotification,
 } from "@/context/useNotificationState";
 import { useTransactionFlow } from "@/context/useTransactionFlowState";
+import { WarningPopup } from "../WarningModal/WarningModal";
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,6 +28,10 @@ interface IWalletModal {
   asset: AssetBaseConfig;
   value: string;
   setValue: any;
+  response: boolean;
+  recipient: string;
+  setRecipient: any;
+  transactionType: string
 }
 
 interface Tabs {
@@ -49,12 +54,14 @@ const TABS: Tabs[] = [
   },
 ];
 
-const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setValue }: IWalletModal) => {
+const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setValue, response, recipient, setRecipient, transactionType }: IWalletModal) => {
   const { toggleConfirmationModal } = useTransactionFlow()
+  const [isSufficentBalance, setIsSufficientBalance] = useState<boolean>(true)
   const [dropDownActive, setDropdownActive] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<number>(0);
   const inputRef = useRef(null);
   const { allBalances, togglePending, exec } = useGlobalState();
+  const { account } = useWeb3React()
 
    const handleOnBlur = useCallback(() => {
      setTimeout(() => {
@@ -70,8 +77,18 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
      );
      setValue(inputOverride);
    };
+
+    useEffect(() => {
+      if (typeof allBalances["BinanceSmartChain"] === "undefined") return;
+      const inputOverride = formatBalance(
+        allBalances[asset.chain]![asset.shortName]?.walletBalance!,
+        asset.decimals,
+      );
+      setIsSufficientBalance(+inputOverride >= Number(value));
+    }, [value, setIsSufficientBalance, asset, allBalances]);
   return (
     <div className="mt-[100px]">
+      <WarningPopup />
       <BridgeModalContainer>
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
           <div>
@@ -91,10 +108,9 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
                   activeTab === index && "border-b-2 border-[#1fc7d4]"
                 } px-6 py-2 hover:cursor-pointer`}
                 onClick={() => {
-                  setActiveTab(index)
-                  setTransactionType(tab.name)
-                }
-                }
+                  setActiveTab(index);
+                  setTransactionType(tab.name);
+                }}
               >
                 <span
                   className={`${
@@ -114,7 +130,10 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
           <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
             <div
               className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
-              onClick={() => setShowTokenModal(true)}
+              onClick={() => {
+                if (!account) return;
+                setShowTokenModal(true);
+              }}
             >
               <div className="h-6 w-6">
                 <AssetIcon
@@ -127,21 +146,24 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
                 <UilAngleDown className="h-6 w-6 font-[900]" />
               </div>
             </div>
-            <div>
-              {allBalances["BinanceSmartChain"] ? (
-                <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  {`balance ${formatBalance(
-                    allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-                    asset.decimals
-                  )} tBNB`}
-                </span>
-              ) : (
-                <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  fetching balance{" "}
-                  <UilSpinnerAlt className="h-6 w-6 text-[#7a6eaa]" />
-                </span>
-              )}
-            </div>
+            {account ? (
+              <div>
+                {allBalances["BinanceSmartChain"] ? (
+                  <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                    {`balance ${formatBalance(
+                      allBalances[asset.chain]![asset.shortName]
+                        ?.walletBalance!,
+                      asset.decimals
+                    )} tBNB`}
+                  </span>
+                ) : (
+                  <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                    fetching balance{" "}
+                    <UilSpinnerAlt className="h-6 w-6 text-[#7a6eaa]" />
+                  </span>
+                )}
+              </div>
+            ) : null}
           </div>
           <div
             className={`my-1 flex h-[120px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
@@ -177,11 +199,36 @@ const WalletModal = ({ setShowTokenModal, setTransactionType, asset, value, setV
               })}
             </div>
           </div>
+          {transactionType === "Transfer" && (
+            <div className="mb-4 w-full">
+              <AddressInput
+                type="text"
+                placeholder="enter recipient address"
+                value={recipient}
+                onChange={(e: any) => setRecipient(e.currentTarget.value)}
+              />
+            </div>
+          )}
           <div
             className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]"
-            onClick={toggleConfirmationModal}
+            onClick={() => {
+              if (!account) return;
+              toggleConfirmationModal();
+            }}
           >
-            <span className="text-[18px] font-[900] text-white">Deposit</span>
+            {response ? (
+              <span className="text-[18px] font-[900] text-white">
+                {!account
+                  ? "Connect Wallet"
+                  : isSufficentBalance
+                  ? transactionType
+                  : "Insufficent Balance"}
+              </span>
+            ) : (
+              <span className="text-[16px] font-[900] text-white">
+                {"Starting Server. Please wait"}
+              </span>
+            )}
           </div>
         </div>
       </BridgeModalContainer>

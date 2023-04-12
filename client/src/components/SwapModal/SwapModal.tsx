@@ -13,6 +13,7 @@ import { formatBalance, formatBalancePercent } from "@/utils/misc";
 import { useWeb3React } from "@web3-react/core";
 import { useTransactionFlow } from "@/context/useTransactionFlowState";
 import { usePriceQuery } from "@/hooks/usePriceQuery";
+import { WarningPopup } from "../WarningModal/WarningModal";
 
 
 interface IWalletModal {
@@ -23,6 +24,7 @@ interface IWalletModal {
   outputAmount: string;
   setOutputAmount: any;
   toAsset: AssetBaseConfig;
+  response: boolean;
 }
 
 interface Tabs {
@@ -38,6 +40,7 @@ const SwapModal = ({
   outputAmount,
   setOutputAmount,
   toAsset,
+  response
 }: IWalletModal) => {
   const { toggleConfirmationModal } = useTransactionFlow();
   const { library, account } = useWeb3React();
@@ -46,6 +49,7 @@ const SwapModal = ({
   const outputRef = useRef(null);
 
   const [on, setOn] = useState<boolean>(false);
+  const [isSufficentBalance, setIsSufficientBalance] = useState<boolean>(true);
   const [inputDropDownActive, setInputDropdownActive] = useState<boolean>(false);
   const [outputDropDownActive, setOutputDropdownActive] = useState<boolean>(false);
   const { allBalances, setIsOutputCurrency } = useGlobalState();
@@ -60,7 +64,7 @@ const SwapModal = ({
            ? setOutputAmount(res.convertedOutAmount)
            : setInputAmount(res.convertedOutAmount);
       }).catch((error: Error) => {
-        console.log(error)
+       
         // setInputAmount("")
       });
     },
@@ -70,7 +74,7 @@ const SwapModal = ({
   const onChange = useCallback(
     (v: string, input: string) => {
       let tokenValue: number | string = v;
-      console.log(tokenValue)
+     
        if (inputAmount === '' || inputAmount === "0" && inputDropDownActive) {
          setOutputAmount("0");
        } else if (outputAmount === "" || outputAmount === "0" && !inputDropDownActive) {
@@ -114,8 +118,19 @@ const SwapModal = ({
     );
     setInputAmount(inputOverride);
   };
+
+   useEffect(() => {
+     if (typeof allBalances["BinanceSmartChain"] === "undefined") return;
+     const inputOverride = formatBalance(
+       allBalances[asset.chain]![asset.shortName]?.walletBalance!,
+       asset.decimals
+     );
+     setIsSufficientBalance(+inputOverride >= Number(inputAmount));
+   }, [inputAmount, setIsSufficientBalance, asset, allBalances]);
   return (
     <div className="mt-[100px]">
+      <WarningPopup />
+
       <BridgeModalContainer>
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
           <div>
@@ -132,7 +147,10 @@ const SwapModal = ({
           <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
             <div
               className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
-              onClick={() => setShowTokenModal(true)}
+              onClick={() => {
+                if (!account) return;
+                setShowTokenModal(true);
+              }}
             >
               <div className="h-6 w-6">
                 <AssetIcon
@@ -149,30 +167,34 @@ const SwapModal = ({
                 <UilAngleDown className="h-6 w-6 font-[900]" />
               </div>
             </div>
-            <div>
-              {allBalances["BinanceSmartChain"] ? (
-                <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  {`balance ${
-                    !toggle
-                      ? formatBalance(
-                          allBalances[asset.chain]![asset.shortName]
-                            ?.walletBalance!,
-                          asset.decimals
-                        )
-                      : formatBalance(
-                          allBalances[toAsset.chain]![toAsset.shortName]
-                            ?.walletBalance!,
-                          toAsset.decimals
-                        )
-                  }} tBNB`}
-                </span>
-              ) : (
-                <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  fetching balance{" "}
-                  <UilSpinnerAlt className="h-6 w-6 text-[#7a6eaa]" />
-                </span>
-              )}
-            </div>
+            {account ? (
+              <div>
+                {allBalances["BinanceSmartChain"] ? (
+                  <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                    {`balance ${
+                      !toggle
+                        ? formatBalance(
+                            allBalances[asset.chain]![asset.shortName]
+                              ?.walletBalance!,
+                            asset.decimals
+                          )
+                        : formatBalance(
+                            allBalances[toAsset.chain]![toAsset.shortName]
+                              ?.walletBalance!,
+                            toAsset.decimals
+                          )
+                    }} tBNB`}
+                  </span>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                      fetching balance{" "}
+                    </span>
+                    <UilSpinnerAlt className="h-6 w-6 animate-spin text-[#7a6eaa]" />
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
           <div
             className={`my-1 flex h-[120px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
@@ -228,6 +250,7 @@ const SwapModal = ({
             <div
               className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
               onClick={() => {
+                if (!account) return;
                 setShowTokenModal(true);
                 setIsOutputCurrency(true);
               }}
@@ -247,30 +270,34 @@ const SwapModal = ({
                 <UilAngleDown className="h-6 w-6 font-[900]" />
               </div>
             </div>
-            <div>
-              {allBalances["BinanceSmartChain"] ? (
-                <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  {`balance ${
-                    !toggle
-                      ? formatBalance(
-                          allBalances[asset.chain]![toAsset.shortName]
-                            ?.walletBalance!,
-                          toAsset.decimals
-                        )
-                      : formatBalance(
-                          allBalances[asset.chain]![toAsset.shortName]
-                            ?.walletBalance!,
-                          toAsset.decimals
-                        )
-                  } tBNB`}
-                </span>
-              ) : (
-                <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                  fetching balance{" "}
-                  <UilSpinnerAlt className="h-6 w-6 text-[#7a6eaa]" />
-                </span>
-              )}
-            </div>
+            {account ? (
+              <div>
+                {allBalances["BinanceSmartChain"] && account ? (
+                  <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                    {`balance ${
+                      !toggle
+                        ? formatBalance(
+                            allBalances[asset.chain]![toAsset.shortName]
+                              ?.walletBalance!,
+                            toAsset.decimals
+                          )
+                        : formatBalance(
+                            allBalances[asset.chain]![toAsset.shortName]
+                              ?.walletBalance!,
+                            toAsset.decimals
+                          )
+                    } tBNB`}
+                  </span>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-[15px] font-[600] text-[#7a6eaa]">
+                      fetching balance{" "}
+                    </span>
+                    <UilSpinnerAlt className="h-6 w-6 animate-spin text-[#7a6eaa]" />
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
           <div
             className={`my-1 flex h-[90px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
@@ -297,9 +324,24 @@ const SwapModal = ({
 
           <div
             className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]"
-            onClick={toggleConfirmationModal}
+            onClick={() => {
+              if (!account) return;
+              toggleConfirmationModal();
+            }}
           >
-            <span className="text-[18px] font-[900] text-white">Deposit</span>
+            {response ? (
+              <span className="text-[18px] font-[900] text-white">
+                {!account
+                  ? "Connect Wallet"
+                  : isSufficentBalance
+                  ? "Swap"
+                  : "Insufficent Balance"}
+              </span>
+            ) : (
+              <span className="text-[16px] font-[900] text-white">
+                {"Starting Server. Please wait"}
+              </span>
+            )}
           </div>
         </div>
       </BridgeModalContainer>

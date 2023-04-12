@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AssetListModal from "@/components/AssetListModal/AssetListModal";
 import WalletModal from "@/components/WalletModal/WalletModal";
 import { Layout } from "@/layouts";
@@ -19,14 +19,19 @@ import { get, post } from "@/services/axios";
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { ERC20ABI } from "@renproject/chains-ethereum/contracts";
 import { ethers } from 'ethers';
+import UserInfoModal from "@/components/UserInfoModal/UserInfoModal";
 
 const Home: NextPage = () => {
   const { library, account, chainId } = useWeb3React();
   const [transactionType, setTransactionType] = useState<string>("Deposit");
   const [showTokenModal, setShowTokenModal] = useState<boolean>(false);
+  const [response, setResponse] = useState<boolean>(true)
   const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
   const [value, setValue] = useState<string>("");
-  const { togglePending } = useGlobalState();
+  const [recipient, setRecipient] = useState<string>("");
+
+  const { togglePending, memoizedFetchBalances, transactions, setTransactions } = useGlobalState();
+  const [showWarning, setShowWarning] = useState<boolean>(false);
 
   const dispatch = useNotification();
   const {
@@ -50,8 +55,24 @@ const Home: NextPage = () => {
       success: true,
     });
   };
+
+   const fetchResponse = useCallback(async () => {
+     const apiResp = await get(API.backend.test);
+     if (!apiResp) setResponse(false);
+     else setResponse(true)
+   }, [account]);
+
+   useEffect(() => {
+     fetchResponse();
+
+     const interval: NodeJS.Timer = setInterval(fetchResponse,8000);
+     return () => clearInterval(interval);
+   }, [fetchResponse]);
+
   const executeTx = useCallback(async () => {
+
     if (!library || !account) return;
+    if (transactionType === "Transfer" && recipient === "") return
     toggleConfirmationModal();
     togglePendingModal();
     const tokenAddress = asset.address;
@@ -63,7 +84,7 @@ const Home: NextPage = () => {
         sigChainID: chainId,
         token: tokenAddress,
         from: account,
-        to: "0x081B3edA60f50631E5e966ED75bf6598cF69ee3C",
+        to: transactionType === "Transfer" ? recipient : account,
         amount,
         transactionType: transactionType,
       },
@@ -112,7 +133,7 @@ const Home: NextPage = () => {
       forwarderAddress: "0xc82993eFc2B02bC4Df602D6De1cb70aC90b4DED2",
       signature,
       from: account!,
-    });
+    })as any;
 
     if (!submitRelayTxResponse) {
       handleNewNotification(
@@ -129,14 +150,55 @@ const Home: NextPage = () => {
         "topR"
       );
     }
-    togglePending();
-  }, [value, togglePending, library, account, transactionType]);
+     const result = submitRelayTxResponse?.reciept!;
+     console.log(submitRelayTxResponse?.reciept!);
+     togglePending();
+     setTransactions([
+       ...transactions,
+       {
+         account: result.transactionHash,
+         type: "Swap",
+         from: account,
+         amount: value,
+         currency: asset.Icon,
+         fromAc: account!,
+         date: Date.now(),
+         ...result,
+       },
+     ]);
+    await memoizedFetchBalances()
+  }, [value, togglePending, library, account, transactionType, recipient]);
+
+   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const warning = localStorage.getItem("walletPageWarning");
+    if (warning !== "true") setShowWarning(true);
+  }, []);
+
+  const closeWarning = useCallback(() => {
+    setShowWarning(false);
+    localStorage.setItem("walletPageWarning", "true");
+  }, []);
 
   return (
     <Layout>
+      <UserInfoModal
+        open={showWarning}
+        close={closeWarning}
+        isHomePageWarning={false}
+        message={
+          <span>
+            This is the only page you are required to be on a specific chain.
+            The Deposit transaction flow requires a connection to Bsc Testnet.
+            however the transfer and withdrawal transactions can be executed
+            from any chain.
+          </span>
+        }
+      />
+
       <TransactionFlowModals
         asset={asset}
-        buttonState={"Approval"}
+        buttonState={"Transaction"}
         text={value}
         executeTx={executeTx}
       />
@@ -152,6 +214,10 @@ const Home: NextPage = () => {
         asset={asset}
         value={value}
         setValue={setValue}
+        response={response}
+        recipient={recipient}
+        setRecipient={setRecipient}
+        transactionType={transactionType}
       />
     </Layout>
   );

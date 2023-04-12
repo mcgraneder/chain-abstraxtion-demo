@@ -1,13 +1,17 @@
+
+import Discount from "../../../public/Discount.svg";
+import Robot from "../../../public/robot.png"
+import Image from "next/image";
 import Flex from "../Box/Flex";
-import Image from "next/legacy/image";
+// import Image from "next/legacy/image";
 import styled, { keyframes } from "styled-components";
 import bunnyImage from "../../../public/images/astronaut-bunny.png";
 import CompositeImage, { CompositeImageProps } from "./CompositeImage";
 import { SlideSvgDark, SlideSvgLight } from "./SlideSvg";
 import { useWeb3React } from "@web3-react/core";
 import { forwardRef } from "react";
-import PrimaryButton from '../Buttons/PrimaryButton';
-import NextLink from 'next/link';
+import PrimaryButton from "../Buttons/PrimaryButton";
+import NextLink from "next/link";
 
 
 // react-router-dom LinkProps types
@@ -121,55 +125,115 @@ const starsImage: CompositeImageProps = {
   ],
 };
 
-const Hero = () => {
-  const { account, chainId } = useWeb3React();
 
+const styles = {
+  boxWidth: "xl:max-w-[1280px] w-full",
+
+  heading2:
+    "font-poppins font-semibold xs:text-[48px] text-[40px] text-white xs:leading-[76.8px] leading-[66.8px] w-full",
+  paragraph:
+    "font-poppins text-[18px]",
+
+  flexCenter: "flex justify-center items-center",
+  flexStart: "flex justify-center items-start",
+
+  paddingX: "sm:px-16 px-6",
+  paddingY: "sm:py-16 py-6",
+  padding: "sm:px-16 px-6 sm:py-12 py-4",
+
+  marginX: "sm:mx-16 mx-6",
+  marginY: "sm:my-16 my-6",
+};
+const GetStarted = () => (
+  <div
+    className={`${styles.flexCenter} bg-blue-gradient h-[140px] w-[140px] cursor-pointer rounded-full p-[2px]`}
+  >
+    <div
+      className={`${styles.flexCenter} h-[100%] w-[100%] flex-col rounded-full`}
+    >
+      <div className={`${styles.flexStart} flex-row`}>
+        <p className="font-poppins text-[18px] font-medium leading-[23.4px]">
+          <span className="text-gradient">Get</span>
+        </p>
+        {/* <img
+          src={arrowUp}
+          alt="arrow-up"
+          className="h-[23px] w-[23px] object-contain"
+        /> */}
+      </div>
+
+      <p className="font-poppins text-[18px] font-medium leading-[23.4px]">
+        <span className="text-gradient">Started</span>
+      </p>
+    </div>
+  </div>
+);
+
+interface IHero {
+  togleOpenWallet: () => void;
+}
+
+const Hero = ({ toggleOpenWallet}: { toggleOpenWallet: () => void}) => {
+  const { account } = useWeb3React()
   return (
-    <>
-      <style jsx global>
-        {`
-          .slide-svg-dark {
-            display: none;
-          }
-          .slide-svg-light {
-            display: block;
-          }
-          [data-theme="dark"] .slide-svg-dark {
-            display: block;
-          }
-          [data-theme="dark"] .slide-svg-light {
-            display: none;
-          }
-        `}
-      </style>
+    <section
+      id="home"
+      className={`flex flex-col md:flex-row ${styles.paddingY}`}
+    >
       <BgWrapper>
         <InnerWrapper>
-          <SlideSvgDark className="slide-svg-dark" width="100%" />
           <SlideSvgLight className="slide-svg-light" width="100%" />
         </InnerWrapper>
       </BgWrapper>
-      <Flex
-        position="relative"
-        flexDirection={["column-reverse", null, null, "row"]}
-        alignItems={["flex-end", null, null, "center"]}
-        justifyContent="center"
-        mt={[account ? "280px" : "50px", null, 0]}
-        id="homepage-hero"
+      <div
+        className={`flex-1 ${styles.flexStart} min-h-[600px] flex-col px-6 sm:px-16 xl:px-0`}
       >
-        <Flex flex="1" flexDirection="column">
-          {/* <Heading scale="xxl" color="rgb(118,69,217)" mb="24px">
-            {"Enjoy your Cake from anywhere!"}
-          </Heading>
-          <Heading2 scale="md" mb="24px" color={""}>
-            {
-              "On PancakeSwap V3, Defi users can execute swaps & trades on any chain from any chain. It's that simple"
-            }
-          </Heading2> */}
-          <Flex>
+        <div className="flex w-full flex-row items-center justify-between ">
+          <h1 className="ss:text-[79px]  flex-1 font-poppins text-[65px] font-[800] leading-[65px] text-[rgb(118,69,217)]">
+            Enjoy your
+            <span className="text-gradient font-[800] text-[rgb(31,199,212)]">
+              {" "}
+              Cake
+            </span>{" "}
+          </h1>
+          <div className="ss:flex mr-0 hidden md:mr-4">
+            <GetStarted />
+          </div>
+        </div>
+
+        <h1 className="ss:text-[68px] w-full font-poppins text-[65px] font-[800] leading-[65px] text-[rgb(118,69,217)]">
+          from anywhere.
+        </h1>
+        <p
+          className={`${styles.paragraph} mt-5 max-w-[520px] font-[800] text-[rgb(40,13,95)]`}
+        >
+          Swap any token on any chain, from any chain all for free with 0 gas.
+          Simply amazing.
+        </p>
+        <div className="mt-8 flex items-center justify-center gap-4">
+          {!account && (
             <PrimaryButton
               className={`relative mr-4 mt-[2px] ${
                 account
-                  ? "border-[#1fc7d4] border-b-[3px] bg-[#e9eaeb] hover:bg-[#eeeef1]"
+                  ? "border-b-[3px] border-[#1fc7d4] bg-[#e9eaeb] hover:bg-[#eeeef1]"
+                  : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
+              } rounded-xl py-[12px]`}
+              onClick={toggleOpenWallet}
+            >
+              <span
+                className={`${
+                  account ? "ml-6 mr-2 text-[#280d5f]" : " text-white"
+                } hidden font-[900] xs:block`}
+              >
+                Connect Wallet
+              </span>
+            </PrimaryButton>
+          )}
+          <NextLinkFromReactRouter to="/swap">
+            <PrimaryButton
+              className={`relative mt-[2px] ${
+                account
+                  ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] hover:bg-[#eeeef1]"
                   : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
               } rounded-xl py-[12px]`}
               // onClick={ac}
@@ -179,50 +243,33 @@ const Hero = () => {
                   account ? "ml-6 mr-2 text-[#280d5f]" : " text-white"
                 } hidden font-[900] xs:block`}
               >
-                Learn More
+                Get Started
               </span>
             </PrimaryButton>
-            <NextLinkFromReactRouter to="/swap">
-              <PrimaryButton
-                className={`relative mt-[2px] ${
-                  account
-                    ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] hover:bg-[#eeeef1]"
-                    : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
-                } rounded-xl py-[12px]`}
-                // onClick={ac}
-              >
-                <span
-                  className={`${
-                    account ? "ml-6 mr-2 text-[#280d5f]" : " text-white"
-                  } hidden font-[900] xs:block`}
-                >
-                  Get Started
-                </span>
-              </PrimaryButton>
-            </NextLinkFromReactRouter>
-          </Flex>
-        </Flex>
-        <Flex
-          height={["192px", null, null, "100%"]}
-          width={["192px", null, null, "100%"]}
-          flex={[null, null, null, "1"]}
-          mb={["24px", null, null, "0"]}
-          position="relative"
-        >
-          <BunnyWrapper>
-            <Image
-              src={bunnyImage}
-              priority
-              placeholder="blur"
-              alt={"Lunar bunny"}
-            />
-          </BunnyWrapper>
-          <StarsWrapper>
-            <CompositeImage {...starsImage} />
-          </StarsWrapper>
-        </Flex>
-      </Flex>
-    </>
+          </NextLinkFromReactRouter>
+        </div>
+      </div>
+
+      {/* <div className={`ss:hidden ${styles.flexCenter}`}>
+        <GetStarted />
+      </div> */}
+      <div
+        className={`flex flex-1 ${styles.flexCenter} relative my-10 items-center justify-center md:my-0`}
+      >
+        <BunnyWrapper>
+          <Image
+            src={bunnyImage}
+            priority
+            placeholder="blur"
+            alt={"Lunar bunny"}
+            width={600}
+          />
+        </BunnyWrapper>
+        <StarsWrapper>
+          <CompositeImage {...starsImage} />
+        </StarsWrapper>
+      </div>
+    </section>
   );
 };
 

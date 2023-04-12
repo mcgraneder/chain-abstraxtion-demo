@@ -54,7 +54,7 @@ const getMulticallConfig = (chain: Chain): MulticallConfig => {
     new Web3.providers.HttpProvider(PorividerConfig[chain]!.url)
   );
 
-  const multicallProvider = new Web3ProviderConnector(chainProvider);
+  const multicallProvider = new Web3ProviderConnector(chainProvider as any);
   const multicallService = new MultiCallService(
     multicallProvider,
     multicallDeployments[chain]!

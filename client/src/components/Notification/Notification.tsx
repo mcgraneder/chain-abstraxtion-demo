@@ -68,7 +68,7 @@ const Notification =({
       position={position}
     >
       <div className="flex mt-1 justify-center">
-        {success ? (
+        {type === "info" ? (
           <UilCheckCircle size="40" color={"rgb(38,162,91)"} />
         ) : (
           <UilExclamationTriangle size="40" color={"red"} />

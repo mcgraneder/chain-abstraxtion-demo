@@ -3,6 +3,9 @@ import { useWeb3React } from "@web3-react/core";
 import { FormWrapper } from "../CSS/WalletModal.styles";
 import { UilCheckCircle, UilArrowLeft, UilTimes } from '@iconscout/react-unicons';
 import Link from "next/link";
+import { useViewport } from "@/hooks/useViewport";
+import { Breakpoints } from "@/constants/Breakpoints";
+import BottomSheetOptions from "../BottomSheet/BottomSheet";
 
 interface TxSubmittedProps {
   close: () => void;
@@ -18,7 +21,6 @@ const TxSubmittedInner = ({
   active: boolean;
   close: () => void;
 }) => {
-
   return (
     <>
       <div className={`mb-2 flex items-center ${"justify-between"} px-2`}>
@@ -53,36 +55,50 @@ function TransactionSubmittedModal({
   close,
   open,
   asset,
-  chain
+  chain,
 }: TxSubmittedProps) {
   const { active } = useWeb3React();
+  const { width } = useViewport();
 
-    // const AddAsset = useCallback(async(): Promise<void> => {
-    //   const tokenAddress = chainAdresses[chain.fullName]!.assets[asset.Icon]?.tokenAddress
-    //   const symbol = `testRen${asset.Icon}`
-    //   //@ts-ignore
-    //   const { ethereum } = window;
-    //   try {
-    //     await ethereum.request({
-    //     method: "wallet_watchAsset",
-    //     params: {
-    //       type: "ERC20", 
-    //       options: {
-    //         address: tokenAddress,
-    //         symbol: symbol, 
-    //         decimals: asset.decimals,
-    //       },
-    //     },
-    //   });
-    //   } catch(error: any) {
-    //     console.log(error)
-    //   }
-    // }, [asset, chain])
+  // const AddAsset = useCallback(async(): Promise<void> => {
+  //   const tokenAddress = chainAdresses[chain.fullName]!.assets[asset.Icon]?.tokenAddress
+  //   const symbol = `testRen${asset.Icon}`
+  //   //@ts-ignore
+  //   const { ethereum } = window;
+  //   try {
+  //     await ethereum.request({
+  //     method: "wallet_watchAsset",
+  //     params: {
+  //       type: "ERC20",
+  //       options: {
+  //         address: tokenAddress,
+  //         symbol: symbol,
+  //         decimals: asset.decimals,
+  //       },
+  //     },
+  //   });
+  //   } catch(error: any) {
+  //     console.log(error)
+  //   }
+  // }, [asset, chain])
 
   return (
-    <FormWrapper>
-      <TxSubmittedInner active={active} close={close} />
-    </FormWrapper>
+    <>
+      {width > 0 && width >= Breakpoints.sm1 ? (
+        <FormWrapper>
+          <TxSubmittedInner active={active} close={close} />
+        </FormWrapper>
+      ) : (
+        <BottomSheetOptions
+          hideCloseIcon
+          open={open}
+          setOpen={close}
+          title={"Submitted"}
+        >
+          <TxSubmittedInner active={active} close={close} />
+        </BottomSheetOptions>
+      )}
+    </>
   );
 }
 

@@ -47,7 +47,7 @@ const AssetListModal = ({
 
   const handleCurrencyChange = useCallback(
     (option: AssetBaseConfig): void => {
-      console.log(isOutputCurrency);
+   
       isOutputCurrency ? setToAsset(option) : setAsset(option);
       setShowTokenModal(false);
       setIsOutputCurrency(false);
@@ -106,7 +106,7 @@ const AssetListModal = ({
               })
               // .sort(handleSort)
               .map((asset: AssetBaseConfig, index: number) => {
-                console.log(allBalances.length);
+             
                 const formattedBalance = formatBalance(
                   allBalances[asset.chain]![asset.shortName]?.walletBalance!, asset.decimals
                 );

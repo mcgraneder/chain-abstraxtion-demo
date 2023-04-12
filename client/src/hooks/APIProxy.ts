@@ -2,7 +2,6 @@ import { Wallet, ethers } from "ethers";
 import { ERC20ABI } from '@renproject/chains-ethereum/contracts';
 import DEPOSITOR_ABI  from"../constants/ABIs/Depositer.json"
 import FORWARDER_ABI  from"../constants/ABIs/ForwarderABI.json"
-
 export interface UserOp {
   to: string;
   amount: string;
@@ -15,8 +14,11 @@ export interface Transaction {
   signature: string;
 }
 
- const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545/");
-
+ export const provider = new ethers.providers.JsonRpcProvider("https://data-seed-prebsc-1-s1.binance.org:8545/");
+ export const signer = new Wallet(
+   "b11f757a04aef7e265c4dcbc2a9279975a2283938e32fc35a0615c251d8ff4ec",
+   provider as any
+ );
 const getMetaTxTypedData = async (
   userOps: any,
   sigChainID: number,
@@ -68,7 +70,7 @@ const getMetaTxTypedData = async (
 export async function getSwapTypedData(chainID: number, sigChainID: number, tokenAddress: string, amount: string, from: string) {
          
     const signer = new Wallet(
-      "e3986801b4817d188fe551eca7cc58a1ae4097f6f40136499137427c62ed9a9b",
+      "const [isSufficentBalance, setIsSufficientBalance] = useState<boolean>(true)",
       provider as any
     )
     const tokenContract = new ethers.Contract(

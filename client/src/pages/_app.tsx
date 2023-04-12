@@ -5,6 +5,10 @@ import "@/styles/globals.css";
 import { GlobalStateProvider } from "@/context/GlobalState";
 import NotificationProvider from "@/context/useNotificationState";
 import { TransactionFlowStateProvider } from "@/context/useTransactionFlowState";
+import "../styles/globals.css";
+import "../styles/Accordian.css";
+import "../styles/AccordianItem.css";
+import "../styles/tooltip.css";
 
 function getLibrary(provider: ExternalProvider): Web3Provider {
   return new Web3Provider(provider);

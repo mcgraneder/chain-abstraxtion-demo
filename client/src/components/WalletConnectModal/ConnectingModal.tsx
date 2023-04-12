@@ -2,9 +2,13 @@ import React from "react";
 import { useWeb3React } from "@web3-react/core";
 import { FormWrapper } from "../CSS/WalletModal.styles";
 import { UilCheckCircle, UilSpinner, UilArrowLeft, UilTimes } from '@iconscout/react-unicons';
+import { useViewport } from "@/hooks/useViewport";
+import { Breakpoints } from "@/constants/Breakpoints";
+import BottomSheetOptions from "../BottomSheet/BottomSheet";
 
 interface ConnectingModalProps {
   close: () => void;
+  open: boolean;
 }
 
 interface IconProps {
@@ -58,13 +62,27 @@ const ConnectingModalInner = ({ active, close }: { active: boolean; close: () =>
     );
 };
 
-function ConnectingModal({ close }: ConnectingModalProps) {
+function ConnectingModal({ close, open }: ConnectingModalProps) {
     const { active } = useWeb3React();
+    const { width } = useViewport()
 
     return (
-      <FormWrapper>
-        <ConnectingModalInner active={active} close={close} />
-      </FormWrapper>
+      <>
+        {width > 0 && width >= Breakpoints.sm1 ? (
+          <FormWrapper>
+            <ConnectingModalInner active={active} close={close} />
+          </FormWrapper>
+        ) : (
+          <BottomSheetOptions
+            hideCloseIcon
+            open={open}
+            setOpen={close}
+            title={"Connecting"}
+          >
+            <ConnectingModalInner active={active} close={close} />
+          </BottomSheetOptions>
+        )}
+      </>
     );
 }
 

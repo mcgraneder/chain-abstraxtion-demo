@@ -80,8 +80,9 @@ function TransactionFlowModals({
             toggleConfirmationModal={toggleConfirmationModal}
             text={text}
             asset={asset}
-            transactionType={"Approval"}
+            transactionType={"Transaction"}
             executeTx={executeTx}
+            open={confirmation}
           />
         )}
         {pending && (
@@ -89,7 +90,7 @@ function TransactionFlowModals({
             close={togglePendingModal}
             open={pending}
             text={text}
-            transactionType={"Approval"}
+            transactionType={"Transaction"}
             asset={asset}
           />
         )}

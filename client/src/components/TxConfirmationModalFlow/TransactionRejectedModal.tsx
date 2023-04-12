@@ -4,6 +4,8 @@ import { useViewport } from "../../hooks/useViewport";
 import { FormWrapper } from "../CSS/WalletModal.styles";
 import { UilExclamationTriangle, UilTimes } from '@iconscout/react-unicons';
 import PrimaryButton from "../Buttons/PrimaryButton";
+import { Breakpoints } from "@/constants/Breakpoints";
+import BottomSheetOptions from "../BottomSheet/BottomSheet";
 
 interface PendingTransactionModalProps {
   close: () => void;
@@ -55,9 +57,22 @@ function TransactionRejectedModal({ close, open }: PendingTransactionModalProps)
   const { width } = useViewport();
 
   return (
-    <FormWrapper>
-      <TransactionRejectedInner active={active} close={close} />
-    </FormWrapper>
+    <>
+      {width > 0 && width >= Breakpoints.sm1 ? (
+        <FormWrapper>
+          <TransactionRejectedInner active={active} close={close} />
+        </FormWrapper>
+      ) : (
+        <BottomSheetOptions
+          hideCloseIcon
+          open={open}
+          setOpen={close}
+          title={"Error"}
+        >
+          <TransactionRejectedInner active={active} close={close} />
+        </BottomSheetOptions>
+      )}
+    </>
   );
 }
 

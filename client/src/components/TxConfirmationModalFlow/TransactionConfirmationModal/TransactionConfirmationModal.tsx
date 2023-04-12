@@ -8,6 +8,9 @@ import FeeSummary from "./components/FeeSummary";
 import TransactionSummary from "./components/TransactionSummary";
 import ProtocolBanner from "./components/GasOptionSummary";
 import styled from "styled-components"
+import { useViewport } from "@/hooks/useViewport";
+import BottomSheetOptions from "@/components/BottomSheet/BottomSheet";
+import { Breakpoints } from "@/constants/Breakpoints";
 
 export const FormWrapper = styled.div`
   position: fixed;
@@ -97,7 +100,8 @@ interface IAssetModal {
   text: string;
   asset: any;
   transactionType: string;
-  executeTx: () => Promise<void>
+  executeTx: () => Promise<void>;
+  open: boolean;
 }
 
 const TxConfirmationModal = ({
@@ -106,21 +110,42 @@ const TxConfirmationModal = ({
   text,
   asset,
   transactionType,
-  executeTx
+  executeTx,
+  open
 }: IAssetModal) => {
   const { account, library } = useWeb3React();
+  const { width } = useViewport()
 
   return (
-    // <Backdrop visible={confirmation}>
-      <FormWrapper>
-        <TxModalInner
-          asset={asset}
-          text={text}
-          transactionType={transactionType}
-          close={toggleConfirmationModal}
-          executeTx={executeTx}
-        />
-      </FormWrapper>
+    <>
+      {width > 0 && width >= Breakpoints.sm1 ? (
+        // <Backdrop visible={confirmation}>
+        <FormWrapper>
+          <TxModalInner
+            asset={asset}
+            text={text}
+            transactionType={transactionType}
+            close={toggleConfirmationModal}
+            executeTx={executeTx}
+          />
+        </FormWrapper>
+      ) : (
+        <BottomSheetOptions
+          hideCloseIcon
+          open={open}
+          setOpen={toggleConfirmationModal}
+          title={"Connecting"}
+        >
+          <TxModalInner
+            asset={asset}
+            text={text}
+            transactionType={transactionType}
+            close={toggleConfirmationModal}
+            executeTx={executeTx}
+          />
+        </BottomSheetOptions>
+      )}
+    </>
     // </Backdrop>
   );
 };

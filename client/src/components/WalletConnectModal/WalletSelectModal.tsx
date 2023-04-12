@@ -4,6 +4,9 @@ import { FormWrapper } from "../CSS/WalletModal.styles";
 import PrimaryButton from "../Buttons/PrimaryButton";
 import { WalletInfo, WALLETS } from "../../connection/wallets";
 import { UilTimes } from '@iconscout/react-unicons';
+import BottomSheetOptions from "../BottomSheet/BottomSheet";
+import { useViewport } from "@/hooks/useViewport";
+import { Breakpoints } from "@/constants/Breakpoints";
 
 const getWalletOptions = () => {
     return Object.values(WALLETS);
@@ -20,6 +23,7 @@ interface WalletSelectProps {
     setConnecting: React.Dispatch<React.SetStateAction<boolean>>;
     connectOn: (provider1: any) => void;
     setPendingWallet: React.Dispatch<any>;
+    openWalletModal: boolean;
 }
 
 interface WalletSelectInnerProps {
@@ -94,8 +98,9 @@ const WalletSelectModalInner = ({ connect, active, toggleWalletModal, deactivate
     );
 };
 
-const WalletSelectModal = ({ toggleWalletModal, setConnecting, connectOn, setPendingWallet }: WalletSelectProps) => {
+const WalletSelectModal = ({ toggleWalletModal, setConnecting, connectOn, setPendingWallet, openWalletModal }: WalletSelectProps) => {
     const { active, deactivate } = useWeb3React();
+    const { width } = useViewport()
  
     const disconnect = () => {
         deactivate()
@@ -112,14 +117,31 @@ const WalletSelectModal = ({ toggleWalletModal, setConnecting, connectOn, setPen
     };
 
     return (
-      <FormWrapper>
-        <WalletSelectModalInner
-          toggleWalletModal={toggleWalletModal}
-          connect={connect}
-          deactivate={disconnect}
-          active={active}
-        />
-      </FormWrapper>
+      <>
+      {width > 0 && width >= Breakpoints.sm1 ? (
+        <FormWrapper>
+          <WalletSelectModalInner
+            toggleWalletModal={toggleWalletModal}
+            connect={connect}
+            deactivate={disconnect}
+            active={active}
+          />
+        </FormWrapper>)
+        :
+        (<BottomSheetOptions
+          hideCloseIcon
+          open={openWalletModal}
+          setOpen={toggleWalletModal}
+          title={"Connect a wallet"}
+        >
+          <WalletSelectModalInner
+            toggleWalletModal={toggleWalletModal}
+            connect={connect}
+            deactivate={disconnect}
+            active={active}
+          />
+        </BottomSheetOptions>)}
+      </>
     );
 };
 

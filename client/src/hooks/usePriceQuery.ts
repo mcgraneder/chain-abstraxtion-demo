@@ -35,7 +35,7 @@ export const usePriceQuery = (fromAsset: AssetBaseConfig, toAsset: AssetBaseConf
     input: string
   ) => {
     if (inputAmount === "0" || inputAmount === ' ') {
-      console.log(true)
+    
       return
     }
     const tradeAmount = ethers.utils.parseUnits(inputAmount.toString(), 18);
@@ -91,9 +91,9 @@ export const usePriceQuery = (fromAsset: AssetBaseConfig, toAsset: AssetBaseConf
         FACTORY_ABI,
         provir
       );
-      console.log(tokenA.address, tokenB.address)
+     
       const address = await factory.getPair(tokenA.address, tokenB.address);
-      console.log(address);
+  
       const [reserves0, reserves1] = await new Contract(
         address,
         IPancakePair,
@@ -116,7 +116,7 @@ export const usePriceQuery = (fromAsset: AssetBaseConfig, toAsset: AssetBaseConf
     amount: string,
     asset: AssetBaseConfig
   ) => {
-    console.log(Number(transaction[0]), Number(transaction[1]));
+   
 
     const signer = library.getSigner();
     const approvalAmount = ethers.utils.parseUnits(amount, 18).toString();

@@ -29,6 +29,8 @@ type GlobalContextType = {
   toggleWalletModal: () => void;
   setIsOutputCurrency: React.Dispatch<React.SetStateAction<boolean>>;
   isOutputCurrency: boolean;
+  transactions: any;
+  setTransactions: any
 };
 
 export type MulticallReturn = {
@@ -65,6 +67,19 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
     [x: string]: MulticallReturn;
   } | undefined>(undefined);
 
+   const [transactions, setTransactions] = useState<any>([]);
+
+   React.useEffect(() => {
+     const transactionData = localStorage.getItem("transactions");
+     if (transactionData) {
+       JSON.parse(transactionData);
+     }
+   }, []);
+
+   React.useEffect(() => {
+     localStorage.setItem("transactions", JSON.stringify(transactions));
+   });
+
   const togglePending = useCallback(() => {
     setPending((p: boolean) => !p)
   }, [setPending])
@@ -93,7 +108,7 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
   useEffect(() => {
     if (!active) return;
     memoizedFetchBalances();
-    console.log("hey")
+
     const interval: NodeJS.Timer = setInterval(memoizedFetchBalances, 50000);
     return () => clearInterval(interval);
   }, [memoizedFetchBalances, active]);
@@ -113,7 +128,9 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
         openWalletModal,
         toggleWalletModal,
         isOutputCurrency,
-        setIsOutputCurrency
+        setIsOutputCurrency,
+        transactions,
+        setTransactions
       }}
     >
       {children}

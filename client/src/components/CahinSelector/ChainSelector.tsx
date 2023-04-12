@@ -4,24 +4,24 @@ import styled from "styled-components";
 import { CHAINS, ChainType } from "../../connection/chains";
 import { useWeb3React } from "@web3-react/core";
 import GreenDot from "../Icons/GreenDot";
-
-import useWallet from "@/hooks/useWallet"
+import useWallet from "@/hooks/useWallet";
+import PrimaryButton from "../Buttons/PrimaryButton";
+import { Icon } from "../Icons/AssetLogs/Icon";
 
 export const FormWrapper = styled.div`
   position: fixed;
-  left: 74%;
-  top: 28%;
+  right: 0%;
+  top: 29%;
   transform: translate(-50%, -50%);
   width: 300px;
-  background-color: rgb(13, 17, 28);
+  background-color: white;
   text-align: right;
   padding: 10px;
   padding-bottom: 20px;
-  border: 1.5px solid rgb(60, 65, 80);
+  border: 1.5px solid rgb(231, 227, 235);
   border-radius: 15px;
   display: block;
   z-index: 10000000000;
-  box-shadow: 14px 19px 5px 0px rgba(0, 0, 0, 0.85);
 `;
 
 const getChainOptions = () => {
@@ -59,25 +59,27 @@ const TokenSelectDropdown = () => {
 
   return (
     <>
-      <div className="relative left-0 h-fit w-fit" ref={ref}>
+      <div className="relative h-fit w-fit" ref={ref}>
         <ChainSelectorButton
           setIsMenuOpen={setIsMenuOpen}
           activeChain={activeChain}
         />
-           <FormWrapper>
-              {getChainOptions()
-                .filter((chain: ChainType) => chain.isTestnet)
-                .map((chain: ChainType, index: number) => {
-                  return (
-                    <ChainSelector
-                      key={index}
-                      chain={chain}
-                      currentChain={chainId}
-                      switchNetwork={switchNetwork}
-                    />
-                  );
-                })}
-            </FormWrapper>
+        {isMenuOpen ? (
+          <FormWrapper>
+            {getChainOptions()
+              .filter((chain: ChainType) => chain.isTestnet)
+              .map((chain: ChainType, index: number) => {
+                return (
+                  <ChainSelector
+                    key={index}
+                    chain={chain}
+                    currentChain={chainId}
+                    switchNetwork={switchNetwork}
+                  />
+                );
+              })}
+          </FormWrapper>
+        ) : null}
       </div>
     </>
   );
@@ -91,18 +93,19 @@ const ChainSelectorButton = ({
   activeChain: ChainType | undefined;
 }) => {
   return (
-    <div
-      className="flex items-center rounded-lg bg-black bg-opacity-60 px-2 py-1 text-center hover:cursor-pointer hover:border-gray-500 hover:bg-black hover:bg-opacity-20"
-      onClick={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        e.stopPropagation();
-        setIsMenuOpen((o: boolean) => !o);
-      }}
-    >
-      {activeChain && <activeChain.logo />}
-      <span className="hidden w-full text-center mlg:block">
-        {activeChain ? activeChain.chainName : "Unknown"}
-      </span>
-      <UilAngleDown className={"h-5 w-5 mlg:h-8 mlg:w-8"} />
+    <div className="mr-5 flex  h-full items-center">
+      <PrimaryButton
+        className="relative mt-[2px] border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] bg-white py-[4px] hover:bg-[#eeeef1]"
+        onClick={() => setIsMenuOpen(true)}
+      >
+        <div className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-black bg-white">
+          {activeChain && <activeChain.logo className="h-6 w-6" />}
+        </div>
+        <span className="ml-6 mr-2 hidden font-[900] text-[#280d5f] xs:block">
+          {activeChain?.chainName}
+        </span>
+        <UilAngleDown className={"h-5 w-5 text-[#280d5f] "} />
+      </PrimaryButton>
     </div>
   );
 };
@@ -113,17 +116,25 @@ const ChainSelector = ({
 }: {
   chain: ChainType;
   currentChain: number | undefined;
-  switchNetwork: (chainid: number) => any;
+  switchNetwork: any;
 }) => {
   return (
     <div
-      className="flex flex-row items-center gap-3 rounded-lg px-2 py-2 hover:cursor-pointer hover:bg-tertiary"
+      className="flex flex-row items-center gap-3 rounded-lg px-2 py-2 hover:cursor-pointer hover:bg-[#e9eaeb]"
       onClick={() => switchNetwork(chain.id)}
     >
       <div className="flex h-full">
         <chain.logo className={"h-5 w-5"} />
       </div>
-      <span className="text-[15px]">{chain.chainName}</span>
+      <span
+        className={`font-[800] ${
+          currentChain && currentChain == chain.id
+            ? "text-[rgb(118,69,217)]"
+            : "text-[#280d5f]"
+        }`}
+      >
+        {chain.chainName}
+      </span>
       {currentChain && currentChain == chain.id && <GreenDot />}
     </div>
   );

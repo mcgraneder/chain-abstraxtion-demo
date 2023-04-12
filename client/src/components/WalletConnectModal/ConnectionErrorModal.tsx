@@ -2,6 +2,9 @@ import React from "react";
 import { FormWrapper } from "../CSS/WalletModal.styles";
 import { UilExclamationTriangle, UilTimes } from '@iconscout/react-unicons';
 import { AbstractConnector } from "@web3-react/abstract-connector";
+import { useViewport } from "@/hooks/useViewport";
+import BottomSheetOptions from "../BottomSheet/BottomSheet";
+import { Breakpoints } from "@/constants/Breakpoints";
 
 interface ConnectionErrorModalProps {
     close: () => void;
@@ -9,7 +12,7 @@ interface ConnectionErrorModalProps {
     toggleWalletModal: () => void;
     pendingWallet: AbstractConnector | undefined;
     connectOn: (provider1: any) => void;
-    message: string;
+    message: string | undefined;
 } 
 
 const ConnectionErrorModalInner = ({ close, setConnecting, toggleWalletModal, pendingWallet, connectOn, message }: ConnectionErrorModalProps) => {
@@ -70,17 +73,38 @@ const ConnectionErrorModalInner = ({ close, setConnecting, toggleWalletModal, pe
 
 function ConnectionErrorModal({ close, setConnecting, toggleWalletModal, pendingWallet, connectOn, message }: ConnectionErrorModalProps) {
 
+    const { width } = useViewport()
     return (
-      <FormWrapper>
-        <ConnectionErrorModalInner
-          close={close}
-          setConnecting={setConnecting}
-          toggleWalletModal={toggleWalletModal}
-          pendingWallet={pendingWallet}
-          connectOn={connectOn}
-          message={message}
-        />
-      </FormWrapper>
+      <>
+        {width > 0 && width >= Breakpoints.sm1 ? (
+          <FormWrapper>
+            <ConnectionErrorModalInner
+              close={close}
+              setConnecting={setConnecting}
+              toggleWalletModal={toggleWalletModal}
+              pendingWallet={pendingWallet}
+              connectOn={connectOn}
+              message={message}
+            />
+          </FormWrapper>
+        ) : (
+          <BottomSheetOptions
+            hideCloseIcon
+            open={message ? true : false}
+            setOpen={close}
+            title={"Connecting"}
+          >
+            <ConnectionErrorModalInner
+              close={close}
+              setConnecting={setConnecting}
+              toggleWalletModal={toggleWalletModal}
+              pendingWallet={pendingWallet}
+              connectOn={connectOn}
+              message={message}
+            />
+          </BottomSheetOptions>
+        )}
+      </>
     );
 }
 

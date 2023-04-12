@@ -1,6 +1,9 @@
 import React from "react";
 import { FormWrapper } from "../CSS/WalletModal.styles";
 import { UilSpinner, UilArrowLeft, UilTimes } from '@iconscout/react-unicons';
+import { useViewport } from "@/hooks/useViewport";
+import { Breakpoints } from "@/constants/Breakpoints";
+import BottomSheetOptions from "../BottomSheet/BottomSheet";
 
 interface PendingTransactionModalProps {
   close: () => void;
@@ -59,19 +62,39 @@ function PendingTransactionModal({
   close,
   text,
   transactionType,
-  asset
+  asset,
+  open
 }: PendingTransactionModalProps) {
- 
+ const { width } = useViewport()
   return (
-    <FormWrapper>
-      <PendingModalInner
-        close={close}
-        text={text}
-        transactionType={transactionType}
-        chain={"chain"}
-        asset={asset}
-      />
-    </FormWrapper>
+    <>
+      {width > 0 && width >= Breakpoints.sm1 ? (
+        <FormWrapper>
+          <PendingModalInner
+            close={close}
+            text={text}
+            transactionType={transactionType}
+            chain={"chain"}
+            asset={asset}
+          />
+        </FormWrapper>
+      ) : (
+        <BottomSheetOptions
+          hideCloseIcon
+          open={open}
+          setOpen={close}
+          title={"Pending"}
+        >
+          <PendingModalInner
+            close={close}
+            text={text}
+            transactionType={transactionType}
+            chain={"chain"}
+            asset={asset}
+          />
+        </BottomSheetOptions>
+      )}
+    </>
   );
 }
 

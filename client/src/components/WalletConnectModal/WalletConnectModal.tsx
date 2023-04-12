@@ -27,7 +27,7 @@ function WalletConnect({
     toggleConecting,
   } = useWallet();
 
-  useEffect(() => console.log(openWalletModal), [openWalletModal]);
+ 
   return (
     <>
       <Backdrop visible={openWalletModal || connecting || error}>
@@ -37,6 +37,7 @@ function WalletConnect({
             toggleWalletModal={toggleWalletModal}
             setConnecting={setConnecting}
             connectOn={connectOn}
+            openWalletModal={openWalletModal}
           />
         )}
         {error && (
@@ -49,7 +50,7 @@ function WalletConnect({
             message={error}
           />
         )}
-        {!error && connecting && <ConnectingModal close={toggleConecting} />}
+        {!error && connecting && <ConnectingModal close={toggleConecting} open={connecting} />}
       </Backdrop>
     </>
   );

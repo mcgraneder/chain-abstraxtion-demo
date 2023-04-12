@@ -30,6 +30,18 @@ export const Input = styled.input`
   /* margin-top: 10px; */
 `;
 
+export const AddressInput = styled.input`
+  background: #eeeaf4;
+  width: 100%;
+  height: 50px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 16px;
+  vertical-align: top;
+
+  /* margin-top: 10px; */
+`;
+
 export const Label = styled.label`
  
   vertical-align: top;
