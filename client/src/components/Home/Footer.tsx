@@ -1,6 +1,8 @@
 
 import Logo from "../../../public/svgs/assets/cake.svg";
 import { UilFacebook, UilTwitter, UilLinkedin } from "@iconscout/react-unicons"
+import { motion } from 'framer-motion';
+import { fadeIn } from "./Stats";
 const styles = {
   boxWidth: "xl:max-w-[1280px] w-full",
 
@@ -104,7 +106,12 @@ export const socialMedia = [
 ];
 
 const Footer = () => (
-  <section
+  <motion.div
+    variants={fadeIn("up", 0.01)}
+    initial="hidden"
+    whileInView={"show"}
+    viewport={{ once: true, amount: 0.15 }}
+    id="features"
     className={`${styles.flexCenter} ${styles.paddingY} absolute left-0 w-full flex-col bg-[rgb(27,32,53)] px-20`}
   >
     <div className={`${styles.flexStart} mb-8 w-full flex-col md:flex-row`}>
@@ -146,7 +153,7 @@ const Footer = () => (
         Copyright Ⓒ 2022 PancakeSwap. All Rights Reserved.
       </p>
     </div>
-  </section>
+  </motion.div>
 );
 
 export default Footer;

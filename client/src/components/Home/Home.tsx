@@ -12,8 +12,9 @@ import { useWeb3React } from "@web3-react/core";
 import { forwardRef } from "react";
 import PrimaryButton from "../Buttons/PrimaryButton";
 import NextLink from "next/link";
-import Section2 from "./Stats";
+import Section2, { fadeIn } from "./Stats";
 import Footer from "./Footer";
+import { motion } from 'framer-motion';
 
 
 // react-router-dom LinkProps types
@@ -179,16 +180,18 @@ const Hero = ({ toggleOpenWallet}: { toggleOpenWallet: () => void}) => {
   const { account } = useWeb3React()
   return (
     <>
-      <section
-        id="home"
-        className={`flex flex-col md:flex-row  h-screen `}
-      >
+      <section id="home" className={`flex h-screen flex-col  md:flex-row `}>
         <BgWrapper>
           <InnerWrapper>
             <SlideSvgLight className="slide-svg-light" width="100%" />
           </InnerWrapper>
         </BgWrapper>
-        <div
+        <motion.div
+          variants={fadeIn("right", 0.01)}
+          initial="hidden"
+          whileInView={"show"}
+          viewport={{ once: true, amount: 0.15 }}
+          id="features"
           className={`flex-1 ${styles.flexStart} min-h-[600px] flex-col px-6 sm:px-16 xl:px-0`}
         >
           <div className="flex w-full flex-row items-center justify-between ">
@@ -251,12 +254,17 @@ const Hero = ({ toggleOpenWallet}: { toggleOpenWallet: () => void}) => {
               </PrimaryButton>
             </NextLinkFromReactRouter>
           </div>
-        </div>
+        </motion.div>
 
         {/* <div className={`ss:hidden ${styles.flexCenter}`}>
         <GetStarted />
       </div> */}
-        <div
+        <motion.div
+          variants={fadeIn("left", 0.01)}
+          initial="hidden"
+          whileInView={"show"}
+          viewport={{ once: true, amount: 0.15 }}
+          id="x"
           className={`hidden md:flex md:flex-1 ${styles.flexCenter} relative my-10 items-center justify-center md:my-0`}
         >
           <BunnyWrapper>
@@ -271,10 +279,10 @@ const Hero = ({ toggleOpenWallet}: { toggleOpenWallet: () => void}) => {
           <StarsWrapper>
             <CompositeImage {...starsImage} />
           </StarsWrapper>
-        </div>
+        </motion.div>
       </section>
       <Section2 />
-      <Footer/>
+      <Footer />
     </>
   );
 };
