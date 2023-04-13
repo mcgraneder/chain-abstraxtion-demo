@@ -189,23 +189,16 @@ function Section2() {
   };
 
   return (
-    //  <>
-    <motion.div
-      variants={fadeIn("up", 0.01)}
-      initial="hidden"
-      whileInView={"show"}
-      viewport={{ once: true, amount: 0.15 }}
-      id="features"
-      className="max-w-screen z-50 flex flex-col items-center px-0 lg:px-12 mb-24"
-    >
-      <StyledTitle2
-        size={40}
-        margin={0}
-        weight={800}
-        align={"center"}
-        color="rgb(31,199,212)"
+    <>
+      <div className="absolute h-[110vh] w-screen bg-[rgb(190,214,245)] left-0 top-[100%] -z-50" />
+      <motion.div
+        variants={fadeIn("up", 0.01)}
+        initial="hidden"
+        whileInView={"show"}
+        viewport={{ once: true, amount: 0.15 }}
+        id="features"
+        className="max-w-screen z-50 mb-24 flex flex-col items-center  px-0 lg:px-12"
       >
-        Used By Millions.
         <StyledTitle2
           size={40}
           margin={0}
@@ -213,91 +206,100 @@ function Section2() {
           align={"center"}
           color="rgb(31,199,212)"
         >
-          Trusted with billions
+          Used By Millions.
+          <StyledTitle2
+            size={40}
+            margin={0}
+            weight={800}
+            align={"center"}
+            color="rgb(31,199,212)"
+          >
+            Trusted with billions
+          </StyledTitle2>
         </StyledTitle2>
-      </StyledTitle2>
 
-      <div className="mt-6 max-w-[55%] break-words text-center text-[18px] text-[#7a6eaa]  lg:mt-8 ">
-        PancakeSwap has the most users of any decentralized platform, ever. And
-        those users are now entrusting the platform with over $3 billion in
-        funds.
-      </div>
-      <div className="mt-6 max-w-[55%] break-words text-center text-[18px] font-[900]  text-[#7a6eaa] lg:mt-8 ">
-        Will you join them?
-      </div>
-      <div className="mt-10 px-8 flex w-full flex-col items-center justify-between gap-8 mlg1:flex-row">
-        <Container className="relative h-[250px] w-full min-w-[25%] border border-[rgb(231,227,235)] bg-white">
-          <div className="mgl1:mx-12 mx-6 mt-5 flex flex-col mlg1:mt-3">
-            <div className="flex flex-row items-center justify-between">
-              <Title className="items-center text-center text-2xl font-[800] text-[rgb(31,199,212)] lg:w-80 lg:text-left mlg:text-3xl">
-                Any Chain
-              </Title>
-              <UilBoltAlt className="h-12 w-12 font-[800] text-[rgb(31,199,212)]" />
+        <div className="mt-6 max-w-[55%] break-words text-center text-[18px] text-[#7a6eaa]  lg:mt-8 ">
+          PancakeSwap has the most users of any decentralized platform, ever.
+          And those users are now entrusting the platform with over $3 billion
+          in funds.
+        </div>
+        <div className="mt-6 max-w-[55%] break-words text-center text-[18px] font-[900]  text-[#7a6eaa] lg:mt-8 ">
+          Will you join them?
+        </div>
+        <div className="mt-10 flex w-full flex-col items-center justify-between gap-8 px-8 mlg1:flex-row">
+          <Container className="relative h-[250px] w-full min-w-[25%] border border-[rgb(231,227,235)] bg-white">
+            <div className="mgl1:mx-12 mx-6 mt-5 flex flex-col mlg1:mt-3">
+              <div className="flex flex-row items-center justify-between">
+                <Title className="items-center text-center text-2xl font-[800] text-[rgb(31,199,212)] lg:w-80 lg:text-left mlg:text-3xl">
+                  Any Chain
+                </Title>
+                <UilBoltAlt className="h-12 w-12 font-[800] text-[rgb(31,199,212)]" />
+              </div>
+              <div className="mt-14 max-w-[100%] break-words text-[#7a6eaa]  lg:mt-8 lg:max-w-full">
+                Trading easy. You no longer need to worry about which network
+                your on to trade. Well handle it for you!
+              </div>
+              <div
+                className="mt-4 flex gap-1 font-semibold  text-[rgb(136,79,250)] hover:cursor-pointer"
+                onClick={toggleWalletModal}
+              >
+                <span className="text-[rgb(118,69,217)] ">Trade Now</span>
+                <span>
+                  <UilAngleUp className="text-[rgb(118,69,217)] " />
+                </span>
+              </div>
             </div>
-            <div className="mt-14 max-w-[100%] break-words text-[#7a6eaa]  lg:mt-8 lg:max-w-full">
-              Trading easy. You no longer need to worry about which network your
-              on to trade. Well handle it for you!
+          </Container>
+          <Container className="bg-bg-white relative h-[250px] w-full min-w-[25%] border border-[rgb(231,227,235)] bg-white">
+            <div className="mgl1:mx-12 mx-6 mt-5 flex flex-col mlg1:mt-3">
+              <div className="flex flex-row items-center justify-between">
+                <Title className="items-center text-left  text-2xl font-[800] text-[rgb(31,199,212)] lg:w-80 mlg:text-3xl">
+                  Reduced Fees
+                </Title>
+                <UilShieldCheck className="h-12 w-12 font-[800] text-[rgb(31,199,212)]" />
+              </div>
+              <div className="mt-14 max-w-[100%]  break-words text-[#7a6eaa]  lg:mt-8 lg:max-w-full">
+                For loyal pancake users we now offer reduced fees where we pay
+                half the fee for you. How about thst!
+              </div>
+              <div
+                className="mt-4 flex gap-1 font-semibold  text-[rgb(136,79,250)] hover:cursor-pointer"
+                onClick={toggleWalletModal}
+              >
+                <span className="text-[rgb(118,69,217)] ">Trade Now</span>
+                <span>
+                  <UilAngleUp className="text-[rgb(118,69,217)] " />
+                </span>
+              </div>
             </div>
-            <div
-              className="mt-4 flex gap-1 font-semibold  text-[rgb(136,79,250)] hover:cursor-pointer"
-              onClick={toggleWalletModal}
-            >
-              <span className="text-[rgb(118,69,217)] ">Trade Now</span>
-              <span>
-                <UilAngleUp className="text-[rgb(118,69,217)] " />
-              </span>
+          </Container>
+          <Container className="bg-bg-white relative h-[250px] w-full min-w-[25%] border border-[rgb(231,227,235)] bg-white">
+            <div className="mgl1:mx-12 mx-6 mt-5 flex flex-col mlg1:mt-3">
+              <div className="flex flex-row items-center justify-between">
+                <Title className="items-center text-center text-2xl font-[800] text-[rgb(31,199,212)] lg:w-80 lg:text-left mlg:text-3xl">
+                  Lightning Fast
+                </Title>
+                <UilDollarSignAlt className="text-[rgb(31,199,212))] h-12 w-12 font-[800]" />
+              </div>
+              <div className="mt-14 max-w-[100%]  break-words text-[#7a6eaa] lg:mt-8 lg:max-w-full">
+                PancakeSwap V3 just rolled out. Now trades are quicker and
+                faster than ever to execute.
+              </div>
+              <div
+                className="mt-4 flex gap-1 font-semibold  text-[rgb(136,79,250)] hover:cursor-pointer"
+                onClick={toggleWalletModal}
+              >
+                <span className="text-[rgb(118,69,217)] ">Trade Now</span>
+                <span>
+                  <UilAngleUp className="text-[rgb(31,199,212)] " />
+                </span>
+              </div>
             </div>
-          </div>
-        </Container>
-        <Container className="bg-bg-white relative h-[250px] w-full min-w-[25%] border border-[rgb(231,227,235)] bg-white">
-          <div className="mgl1:mx-12 mx-6 mt-5 flex flex-col mlg1:mt-3">
-            <div className="flex flex-row items-center justify-between">
-              <Title className="items-center text-left  text-2xl font-[800] text-[rgb(31,199,212)] lg:w-80 mlg:text-3xl">
-                Reduced Fees
-              </Title>
-              <UilShieldCheck className="h-12 w-12 font-[800] text-[rgb(31,199,212)]" />
-            </div>
-            <div className="mt-14 max-w-[100%]  break-words text-[#7a6eaa]  lg:mt-8 lg:max-w-full">
-              For loyal pancake users we now offer reduced fees where we pay
-              half the fee for you. How about thst!
-            </div>
-            <div
-              className="mt-4 flex gap-1 font-semibold  text-[rgb(136,79,250)] hover:cursor-pointer"
-              onClick={toggleWalletModal}
-            >
-              <span className="text-[rgb(118,69,217)] ">Trade Now</span>
-              <span>
-                <UilAngleUp className="text-[rgb(118,69,217)] " />
-              </span>
-            </div>
-          </div>
-        </Container>
-        <Container className="bg-bg-white relative h-[250px] w-full min-w-[25%] border border-[rgb(231,227,235)] bg-white">
-          <div className="mgl1:mx-12 mx-6 mt-5 flex flex-col mlg1:mt-3">
-            <div className="flex flex-row items-center justify-between">
-              <Title className="items-center text-center text-2xl font-[800] text-[rgb(31,199,212)] lg:w-80 lg:text-left mlg:text-3xl">
-                Lightning Fast
-              </Title>
-              <UilDollarSignAlt className="text-[rgb(31,199,212))] h-12 w-12 font-[800]" />
-            </div>
-            <div className="mt-14 max-w-[100%]  break-words text-[#7a6eaa] lg:mt-8 lg:max-w-full">
-              PancakeSwap V3 just rolled out. Now trades are quicker and faster
-              than ever to execute.
-            </div>
-            <div
-              className="mt-4 flex gap-1 font-semibold  text-[rgb(136,79,250)] hover:cursor-pointer"
-              onClick={toggleWalletModal}
-            >
-              <span className="text-[rgb(118,69,217)] ">Trade Now</span>
-              <span>
-                <UilAngleUp className="text-[rgb(31,199,212)] " />
-              </span>
-            </div>
-          </div>
-        </Container>
-      </div>
-      <ProtocolBanner />
-    </motion.div>
+          </Container>
+        </div>
+        <ProtocolBanner />
+      </motion.div>
+    </>
   );
 }
 

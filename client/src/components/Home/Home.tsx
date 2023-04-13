@@ -180,7 +180,7 @@ const Hero = ({ toggleOpenWallet}: { toggleOpenWallet: () => void}) => {
   const { account } = useWeb3React()
   return (
     <>
-      <section id="home" className={`flex h-screen flex-col  md:flex-row `}>
+      <section id="home" className={`flex h-screen flex-col w-screen z-50  md:flex-row`}>
         <BgWrapper>
           <InnerWrapper>
             <SlideSvgLight className="slide-svg-light" width="100%" />
