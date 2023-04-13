@@ -30,7 +30,7 @@ const NavLinks = ({
       {routes.map((route: string, index: number) => {
         return (
           <Link
-            href={`/${route === "history" ? "transactions" : route}`}
+            href={`/${route}`}
             key={route}
             className="mx-1 flex-col items-left gap-2 flex"
             id={route}
