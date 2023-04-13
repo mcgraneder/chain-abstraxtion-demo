@@ -94,9 +94,6 @@ export const Navbar = ({
 
   const Icon = provider ? walletIcon[provider] : undefined;
 
-  const ac = useCallback(() => {
-    toggleWalletModal();
-  }, [toggleWalletModal]);
   return (
     <>
       <SlideOver
@@ -153,7 +150,9 @@ export const Navbar = ({
                       ? "border-b-[3px] border-[#d7d8da] bg-[#e9eaeb] hover:bg-[#eeeef1]"
                       : "bg-[#1fc7d4] hover:bg-[#33e1ed]"
                   } py-[4px]`}
-                  onClick={ac}
+                  onClick={
+                    !active ? toggleWalletModal : toggleAccoundDetailsModal
+                  }
                 >
                   {account || pending ? (
                     <div className="absolute left-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#1fc7d4] bg-white">
