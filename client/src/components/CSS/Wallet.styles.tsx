@@ -12,7 +12,17 @@ export const BridgeModalContainer = styled.div`
   /* font-weight: 900; */
   /* padding: 20px; */
   position: relative;
+  //fixed bottom-0 w-full  overflow-hidden rounded-t-3xl
 
+  @media screen and (max-width: 550px) {
+    position: fixed;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    width: 100%;
+     max-width: 100%;
+    margin: 0;
+    bottom: 0;
+  }
 `;
 
 export const Input = styled.input`
