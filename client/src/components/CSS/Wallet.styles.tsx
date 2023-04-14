@@ -9,9 +9,9 @@ export const BridgeModalContainer = styled.div`
   margin: 30px auto 0;
   background: white;
   color: #280d5f;
-  /* font-weight: 900; */
-  /* padding: 20px; */
+  font-weight: 900;
   position: relative;
+  
   //fixed bottom-0 w-full  overflow-hidden rounded-t-3xl
 
   @media screen and (max-width: 550px) {

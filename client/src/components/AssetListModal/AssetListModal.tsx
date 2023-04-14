@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { Input,  } from "../CSS/AssetListModal.styles";
-import { FormWrapper2 } from "../CSS/WalletModal.styles";
+import { Backdrop, FormWrapper2 } from "../CSS/WalletModal.styles";
 import { Icon } from "../Icons/AssetLogs/Icon";
 import { AssetBaseConfig, assetsBaseConfig } from "@/utils/assetsConfig";
 import { UilTimes } from '@iconscout/react-unicons';
@@ -59,7 +59,7 @@ const AssetListModalInner = ({
 
   return (
     <>
-      <div className="border-[rgb(231,227,235)]; border-b px-[25px] pb-[15px] pt-[30px]">
+      <div className="border-[rgb(231,227,235)] border-b px-[25px] pb-[15px] pt-[30px]">
         <div className={`mb-2 flex items-center ${"justify-between"} pb-4`}>
           <div>
             <span className="text-[18px] font-[900]">Select a Token</span>
@@ -113,7 +113,7 @@ const AssetListModalInner = ({
               );
               return (
                 <div
-                  key={index}
+                  key={asset.shortName}
                   className="cursor: pointer flex items-center justify-between px-8 py-[10px] hover:cursor-pointer hover:bg-[#f6f3f9]"
                   onClick={() => handleCurrencyChange(asset)}
                 >
@@ -155,14 +155,16 @@ const AssetListModal = ({
   return (
     <>
       {width > 0 && width >= Breakpoints.sm1 ? (
-        <FormWrapper2>
-          <AssetListModalInner
-            setShowTokenModal={setShowTokenModal}
-            visible={visible}
-            setAsset={setAsset}
-            setToAsset={setToAsset}
-          />
-        </FormWrapper2>
+        <Backdrop visible={visible}>
+          <FormWrapper2>
+            <AssetListModalInner
+              setShowTokenModal={setShowTokenModal}
+              visible={visible}
+              setAsset={setAsset}
+              setToAsset={setToAsset}
+            />
+          </FormWrapper2>
+        </Backdrop>
       ) : (
         <BottomSheetOptions
           hideCloseIcon

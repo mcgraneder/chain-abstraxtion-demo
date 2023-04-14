@@ -36,9 +36,9 @@ const Home: NextPage = () => {
     localStorage.setItem("swapPageWarning", "true");
   }, []);
 
-  const executeTx = async () => {
+  const executeTx = useCallback(async () => {
     await executeTransaction();
-  }
+  }, [executeTransaction]);
 
   return (
     <Layout>
