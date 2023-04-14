@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { BridgeModalContainer, Input } from "../CSS/Wallet.styles";
-import { Icon as AssetIcon } from "../Icons/AssetLogs/Icon";
+import React, { useState, useEffect, useCallback } from "react";
+import { BridgeModalContainer } from "../CSS/Wallet.styles";
 import {
-  UilAngleDown,
-  UilSpinnerAlt,
   UilArrowDown,
-  UilExchange
+  UilExchange,
 } from "@iconscout/react-unicons";
 import { useGlobalState } from "@/context/GlobalState";
 import { AssetBaseConfig } from "@/utils/assetsConfig";
-import { formatBalance, formatBalancePercent } from "@/utils/misc";
+import { formatBalance } from "@/utils/misc";
 import { useWeb3React } from "@web3-react/core";
-import { useTransactionFlow } from "@/context/useTransactionFlowState";
 import { usePriceQuery } from "@/hooks/usePriceQuery";
 import { WarningPopup } from "../WarningModal/WarningModal";
-
+import TransactionButton from "../Buttons/TransactionButton";
+import CurrencyInput from "../CurrencyInput/CurrencyInput";
+import ModalDescriptor from "../Common/ModalDescriptor";
 
 interface IWalletModal {
   setShowTokenModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,12 +22,26 @@ interface IWalletModal {
   outputAmount: string;
   setOutputAmount: any;
   toAsset: AssetBaseConfig;
-  response: boolean;
 }
 
-interface Tabs {
-  index: number;
-  name: string;
+const CurrencyToggle = ({ toggleSwap }: { toggleSwap: () => void }) => {
+  const [on, setOn] = useState<boolean>(false);
+  return (
+    <div className=" w-full">
+      <div
+        className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#eeeaf4] hover:cursor-pointer hover:bg-[#1fc7d4]"
+        onMouseEnter={() => setOn(true)}
+        onMouseLeave={() => setOn(false)}
+        onClick={toggleSwap}
+      >
+        {on ? (
+          <UilExchange className="h-8 w-8 font-[900] text-white" />
+        ) : (
+          <UilArrowDown className="h-8 w-8 text-[#1fc7d4] hover:text-[#33e1ed]" />
+        )}
+      </div>
+    </div>
+  );
 }
 
 const SwapModal = ({
@@ -40,33 +52,28 @@ const SwapModal = ({
   outputAmount,
   setOutputAmount,
   toAsset,
-  response
 }: IWalletModal) => {
-  const { toggleConfirmationModal } = useTransactionFlow();
   const { library, account } = useWeb3React();
   const { fetchPrice } = usePriceQuery(asset, toAsset);
-  const inputRef = useRef(null);
-  const outputRef = useRef(null);
-
-  const [on, setOn] = useState<boolean>(false);
   const [isSufficentBalance, setIsSufficientBalance] = useState<boolean>(true);
-  const [inputDropDownActive, setInputDropdownActive] = useState<boolean>(false);
-  const [outputDropDownActive, setOutputDropdownActive] = useState<boolean>(false);
-  const { allBalances, setIsOutputCurrency } = useGlobalState();
+  const { allBalances } = useGlobalState();
   const [toggle, setToggle] = useState<boolean>(false);
 
+  const toggleSwap = useCallback(() => setToggle((t: boolean) => !t), [setToggle])
+
   const getSwapPrice = useCallback(
-   async (inputAmount: any, input: string) => {
+    async (inputAmount: any, input: string) => {
       if (!library) return;
 
-      await fetchPrice(library, inputAmount, account!, asset, toAsset, input).then((res: any) => {
-         input === "inputCurrency"
-           ? setOutputAmount(res.convertedOutAmount)
-           : setInputAmount(res.convertedOutAmount);
-      }).catch((error: Error) => {
-       
-        // setInputAmount("")
-      });
+      await fetchPrice(library, inputAmount, account!, asset, toAsset, input)
+        .then((res: any) => {
+          input === "inputCurrency"
+            ? setOutputAmount(res.convertedOutAmount)
+            : setInputAmount(res.convertedOutAmount);
+        })
+        .catch((error: Error) => {
+          // setInputAmount("")
+        });
     },
     [account, library, inputAmount, outputAmount]
   );
@@ -74,19 +81,28 @@ const SwapModal = ({
   const onChange = useCallback(
     (v: string, input: string) => {
       let tokenValue: number | string = v;
-     
-       if (inputAmount === '' || inputAmount === "0" && inputDropDownActive) {
-         setOutputAmount("0");
-       } else if (outputAmount === "" || outputAmount === "0" && !inputDropDownActive) {
-         setInputAmount("0");
-         return
-       }
+
+      if (inputAmount === "" || (inputAmount === "0")) {
+        setOutputAmount("0");
+      } else if (
+        outputAmount === "" ||
+        (outputAmount === "0")
+      ) {
+        setInputAmount("0");
+        return;
+      }
       input === "inputCurrency"
         ? setInputAmount(tokenValue)
         : setOutputAmount(tokenValue);
       getSwapPrice(tokenValue, input);
     },
-    [getSwapPrice, inputAmount, outputAmount, inputDropDownActive, toAsset, asset]
+    [
+      getSwapPrice,
+      inputAmount,
+      outputAmount,
+      toAsset,
+      asset,
+    ]
   );
 
   const handleChange = (
@@ -98,251 +114,57 @@ const SwapModal = ({
     onChange(inputAmount, input);
   };
 
-  const handleInputOnBlur = useCallback(() => {
-    setTimeout(() => {
-      setInputDropdownActive(false);
-    }, 50);
-  }, []);
-
-    const handleOutputOnBlur = useCallback(() => {
-      setTimeout(() => {
-        setOutputDropdownActive(false);
-      }, 50);
-    }, []);
-
-  const onMaxClick = (percent: number) => {
-    const inputOverride = formatBalancePercent(
+  useEffect(() => {
+    if (typeof allBalances["BinanceSmartChain"] === "undefined") {
+      setIsSufficientBalance(false);
+      return;
+    }
+    const inputOverride = formatBalance(
       allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-      asset.decimals,
-      percent / 10
+      asset.decimals
     );
-    setInputAmount(inputOverride);
-  };
+    setIsSufficientBalance(+inputOverride >= Number(inputAmount));
+  }, [inputAmount, setIsSufficientBalance, asset, allBalances]);
 
-   useEffect(() => {
-     if (typeof allBalances["BinanceSmartChain"] === "undefined") return;
-     const inputOverride = formatBalance(
-       allBalances[asset.chain]![asset.shortName]?.walletBalance!,
-       asset.decimals
-     );
-     setIsSufficientBalance(+inputOverride >= Number(inputAmount));
-   }, [inputAmount, setIsSufficientBalance, asset, allBalances]);
   return (
     <div className="mt-[100px]">
       <WarningPopup />
 
       <BridgeModalContainer>
+        <ModalDescriptor
+          heading="Swap"
+          subTitle="Swap tokens without hassle"
+          seperator={true}
+        />
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
-          <div>
-            <span className="text-[18px] font-[900]">Wallet</span>
-          </div>
-          <div className="my-1">
-            <span className="text-[15px] font-[600] text-[#7a6eaa]">
-              Swap tokens without hassle
-            </span>
-          </div>
-        </div>
-        <div className="h-[1px] w-full bg-[rgb(231,227,235)]"></div>
-        <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
-          <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
-            <div
-              className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
-              onClick={() => {
-                if (!account) return;
-                setShowTokenModal(true);
-              }}
-            >
-              <div className="h-6 w-6">
-                <AssetIcon
-                  chainName={
-                    !toggle ? (asset.Icon as string) : (toAsset.Icon as string)
-                  }
-                  className="h-6 w-6"
-                />
-              </div>
-              <span className="#280d5f font-[900]">
-                {!toggle ? asset.shortName : toAsset.shortName}
-              </span>
-              <div className={`flex h-6 w-6 items-center`}>
-                <UilAngleDown className="h-6 w-6 font-[900]" />
-              </div>
-            </div>
-            {account ? (
-              <div>
-                {allBalances["BinanceSmartChain"] ? (
-                  <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                    {`balance ${
-                      !toggle
-                        ? formatBalance(
-                            allBalances[asset.chain]![asset.shortName]
-                              ?.walletBalance!,
-                            asset.decimals
-                          )
-                        : formatBalance(
-                            allBalances[toAsset.chain]![toAsset.shortName]
-                              ?.walletBalance!,
-                            toAsset.decimals
-                          )
-                    }} tBNB`}
-                  </span>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                      fetching balance{" "}
-                    </span>
-                    <UilSpinnerAlt className="h-6 w-6 animate-spin text-[#7a6eaa]" />
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-          <div
-            className={`my-1 flex h-[120px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
-              inputDropDownActive
-                ? "border-4 border-purple-500"
-                : "border-4 border-[#eeeaf4]"
-            } mb-3`}
-            onClick={() => {
-              //@ts-ignore
-              inputRef.current.focus();
-            }}
-          >
-            <Input
-              ref={inputRef}
-              type="number"
-              value={toggle ? outputAmount : inputAmount}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange(e, toggle ? "outputCurrency" : "inputCurrency")
-              }
-              onFocus={() => setInputDropdownActive(true)}
-              onBlur={handleInputOnBlur}
-            />
-            <div className="flex items-center justify-end gap-2">
-              {[25, 50, 75, 100].map((percent: number) => {
-                return (
-                  <div
-                    className="flex items-center justify-center rounded-2xl border-2 border-[#1fc7d4] text-center hover:cursor-pointer"
-                    onClick={() => onMaxClick(percent)}
-                  >
-                    <span className="px-2 py-[0.5px] text-[15px] font-[800] text-[#1fc7d4] hover:text-[#33e1ed]">
-                      {percent}%
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className=" w-full">
-            <div
-              className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#eeeaf4] hover:cursor-pointer hover:bg-[#1fc7d4]"
-              onMouseEnter={() => setOn(true)}
-              onMouseLeave={() => setOn(false)}
-              onClick={() => setToggle(!toggle)}
-            >
-              {on ? (
-                <UilExchange className="h-8 w-8 font-[900] text-white" />
-              ) : (
-                <UilArrowDown className="h-8 w-8 text-[#1fc7d4] hover:text-[#33e1ed]" />
-              )}
-            </div>
-          </div>
-          <div className="flex w-full items-center justify-between hover:text-[#7a6eaa]">
-            <div
-              className={`itrm flex items-center justify-center gap-2 hover:cursor-pointer`}
-              onClick={() => {
-                if (!account) return;
-                setShowTokenModal(true);
-                setIsOutputCurrency(true);
-              }}
-            >
-              <div className="h-6 w-6">
-                <AssetIcon
-                  chainName={
-                    !toggle ? (toAsset.Icon as string) : (asset.Icon as string)
-                  }
-                  className="h-6 w-6"
-                />
-              </div>
-              <span className="#280d5f font-[900]">
-                {!toggle ? toAsset.shortName : (asset.Icon as string)}
-              </span>
-              <div className={`flex h-6 w-6 items-center`}>
-                <UilAngleDown className="h-6 w-6 font-[900]" />
-              </div>
-            </div>
-            {account ? (
-              <div>
-                {allBalances["BinanceSmartChain"] && account ? (
-                  <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                    {`balance ${
-                      !toggle
-                        ? formatBalance(
-                            allBalances[asset.chain]![toAsset.shortName]
-                              ?.walletBalance!,
-                            toAsset.decimals
-                          )
-                        : formatBalance(
-                            allBalances[asset.chain]![toAsset.shortName]
-                              ?.walletBalance!,
-                            toAsset.decimals
-                          )
-                    } tBNB`}
-                  </span>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-[15px] font-[600] text-[#7a6eaa]">
-                      fetching balance{" "}
-                    </span>
-                    <UilSpinnerAlt className="h-6 w-6 animate-spin text-[#7a6eaa]" />
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-          <div
-            className={`my-1 flex h-[90px] w-full flex-col  justify-between gap-4 rounded-2xl bg-[#eeeaf4] px-2 py-2 ${
-              outputDropDownActive
-                ? "border-4 border-purple-500"
-                : "border-4 border-[#eeeaf4]"
-            } mb-3`}
-            onClick={() => {
-              //@ts-ignore
-              outputRef.current.focus?.();
-            }}
-          >
-            <Input
-              ref={outputRef}
-              type="number"
-              value={toggle ? inputAmount : outputAmount}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handleChange(e, toggle ? "inputCurrency" : "outputCurrency")
-              }
-              onFocus={() => setOutputDropdownActive(true)}
-              onBlur={handleOutputOnBlur}
-            />
-          </div>
+          <CurrencyInput
+            asset={asset}
+            setShowTokenModal={setShowTokenModal}
+            value={toggle ? outputAmount : inputAmount}
+            setValue={setInputAmount}
+            handleChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleChange(e, toggle ? "outputCurrency" : "inputCurrency")
+            }
+            allBalances={allBalances}
+            inputCurrency={true}
+          />
+          <CurrencyToggle toggleSwap={toggleSwap}/>
+          <CurrencyInput
+            asset={asset}
+            setShowTokenModal={setShowTokenModal}
+            value={toggle ? inputAmount : outputAmount}
+            setValue={setOutputAmount}
+            handleChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleChange(e, toggle ? "inputCurrency" : "outputCurrency")
+            }
+            allBalances={allBalances}
+            inputCurrency={false}
+          />
 
-          <div
-            className=" flex w-full items-center justify-center rounded-[24px] bg-[#1fc7d4] py-3 hover:bg-[#33e1ed]"
-            onClick={() => {
-              if (!account) return;
-              toggleConfirmationModal();
-            }}
-          >
-            {response ? (
-              <span className="text-[18px] font-[900] text-white">
-                {!account
-                  ? "Connect Wallet"
-                  : isSufficentBalance
-                  ? "Swap"
-                  : "Insufficent Balance"}
-              </span>
-            ) : (
-              <span className="text-[16px] font-[900] text-white">
-                {"Starting Server. Please wait"}
-              </span>
-            )}
-          </div>
+          <TransactionButton
+            isSufficentBalance={isSufficentBalance}
+            transactionType={"Swap"}
+          />
         </div>
       </BridgeModalContainer>
     </div>

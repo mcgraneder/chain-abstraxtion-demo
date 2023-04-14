@@ -1,6 +1,5 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AssetListModal from "@/components/AssetListModal/AssetListModal";
-import WalletModal from "@/components/WalletModal/WalletModal";
 import { Layout } from "@/layouts";
 import type { NextPage } from "next";
 import { assetsBaseConfig } from "../utils/assetsConfig";
@@ -31,7 +30,6 @@ const Home: NextPage = () => {
   const [showTokenModal, setShowTokenModal] = useState<boolean>(false);
   const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
   const [inputAmount, setInputAmount] = useState("");
-  const [response, setResponse] = useState<boolean>(true);
    const [showWarning, setShowWarning] = useState<boolean>(false);
 
   const [outputAmount, setOutputAmount] = useState("");
@@ -67,19 +65,6 @@ const Home: NextPage = () => {
       success: true,
     });
   };
-
-     const fetchResponse = useCallback(async () => {
-       const apiResp = await get(API.backend.test);
-       if (!apiResp) setResponse(false);
-       else setResponse(true);
-     }, [account]);
-
-     useEffect(() => {
-       fetchResponse();
-
-       const interval: NodeJS.Timer = setInterval(fetchResponse, 8000);
-       return () => clearInterval(interval);
-     }, [fetchResponse]);
 
   const executeTx = useCallback(async () => {
     if (!library || !account) return;
@@ -263,7 +248,6 @@ const Home: NextPage = () => {
         outputAmount={outputAmount}
         setOutputAmount={setOutputAmount}
         toAsset={toAsset}
-        response={response}
       />
     </Layout>
   );

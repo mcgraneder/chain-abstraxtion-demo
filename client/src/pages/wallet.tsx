@@ -25,7 +25,6 @@ const Home: NextPage = () => {
   const { library, account, chainId } = useWeb3React();
   const [transactionType, setTransactionType] = useState<string>("Deposit");
   const [showTokenModal, setShowTokenModal] = useState<boolean>(false);
-  const [response, setResponse] = useState<boolean>(true)
   const [asset, setAsset] = useState<AssetBaseConfig>(assetsBaseConfig.BUSD);
   const [value, setValue] = useState<string>("");
   const [recipient, setRecipient] = useState<string>("");
@@ -55,19 +54,6 @@ const Home: NextPage = () => {
       success: true,
     });
   };
-
-   const fetchResponse = useCallback(async () => {
-     const apiResp = await get(API.backend.test);
-     if (!apiResp) setResponse(false);
-     else setResponse(true)
-   }, [account]);
-
-   useEffect(() => {
-     fetchResponse();
-
-     const interval: NodeJS.Timer = setInterval(fetchResponse,8000);
-     return () => clearInterval(interval);
-   }, [fetchResponse]);
 
   const executeTx = useCallback(async () => {
 
@@ -214,7 +200,6 @@ const Home: NextPage = () => {
         asset={asset}
         value={value}
         setValue={setValue}
-        response={response}
         recipient={recipient}
         setRecipient={setRecipient}
         transactionType={transactionType}
