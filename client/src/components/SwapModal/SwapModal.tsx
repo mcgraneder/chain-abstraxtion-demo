@@ -82,15 +82,15 @@ const SwapModal = ({
     (v: string, input: string) => {
       let tokenValue: number | string = v;
 
-      if (inputAmount === "" || (inputAmount === "0")) {
-        setOutputAmount("0");
-      } else if (
-        outputAmount === "" ||
-        (outputAmount === "0")
-      ) {
-        setInputAmount("0");
-        return;
-      }
+      // if (inputAmount === "" || (inputAmount === "0")) {
+      //   setOutputAmount("0");
+      // } else if (
+      //   outputAmount === "" ||
+      //   (outputAmount === "0")
+      // ) {
+      //   setInputAmount("0");
+      //   return;
+      // }
       input === "inputCurrency"
         ? setInputAmount(tokenValue)
         : setOutputAmount(tokenValue);

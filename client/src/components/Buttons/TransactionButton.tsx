@@ -33,7 +33,7 @@ const TransactionButton = ({
         if (!account) return;
         toggleConfirmationModal();
       }}
-      disabled={error}
+      disabled={false}
     >
       <span className="text-[18px] font-[900] text-white">
         {getButtonText()}
