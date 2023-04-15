@@ -81,7 +81,7 @@ const WalletModal = ({
   transactionType,
 }: IWalletModal) => {
   const [isSufficentBalance, setIsSufficientBalance] = useState<boolean>(true);
-  const { allBalances } = useGlobalState();
+  const { allBalances, toggleWalletModal } = useGlobalState();
 
   useEffect(() => {
     if (typeof allBalances["BinanceSmartChain"] === "undefined") return;
@@ -125,6 +125,7 @@ const WalletModal = ({
           <TransactionButton
             isSufficentBalance={isSufficentBalance}
             transactionType={transactionType}
+            toggleWalletModal={toggleWalletModal}
           />
         </div>
       </BridgeModalContainer>

@@ -202,6 +202,7 @@ const useExecuteTransaction = (
 
       const result = submitRelayTxResponse?.receipt!;
 
+      console.log(result)
       togglePending();
       setTransactions([
         ...transactions,

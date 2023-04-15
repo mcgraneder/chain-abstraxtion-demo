@@ -5,11 +5,13 @@ import { useWeb3React } from "@web3-react/core";
 interface ITransactionProps {
   isSufficentBalance: boolean;
   transactionType: string;
+  toggleWalletModal: () => void
 }
 
 const TransactionButton = ({
   isSufficentBalance,
   transactionType,
+  toggleWalletModal
 }: ITransactionProps) => {
   const { account } = useWeb3React();
   const { toggleConfirmationModal } = useTransactionFlow();
@@ -29,10 +31,7 @@ const TransactionButton = ({
   return (
     <PrimaryButton
       className={`flex w-full items-center justify-center rounded-[24px] py-3 hover:cursor-pointer ${getButtonColor()}`}
-      onClick={() => {
-        if (!account) return;
-        toggleConfirmationModal();
-      }}
+      onClick={account ? toggleConfirmationModal : toggleWalletModal}
       disabled={false}
     >
       <span className="text-[18px] font-[900] text-white">

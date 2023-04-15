@@ -56,7 +56,7 @@ const SwapModal = ({
   const { library, account } = useWeb3React();
   const { fetchPrice } = usePriceQuery(asset, toAsset);
   const [isSufficentBalance, setIsSufficientBalance] = useState<boolean>(true);
-  const { allBalances } = useGlobalState();
+  const { allBalances, toggleWalletModal } = useGlobalState();
   const [toggle, setToggle] = useState<boolean>(false);
 
   const toggleSwap = useCallback(() => setToggle((t: boolean) => !t), [setToggle])
@@ -129,7 +129,7 @@ const SwapModal = ({
         />
         <div className="m-4 flex flex-col items-start justify-start gap-2 px-2 py-2">
           <CurrencyInput
-            asset={asset}
+            asset={toggle ? toAsset : asset}
             setShowTokenModal={setShowTokenModal}
             value={toggle ? outputAmount : inputAmount}
             setValue={setInputAmount}
@@ -139,9 +139,9 @@ const SwapModal = ({
             allBalances={allBalances}
             inputCurrency={true}
           />
-          <CurrencyToggle toggleSwap={toggleSwap}/>
+          <CurrencyToggle toggleSwap={(toggleSwap)}/>
           <CurrencyInput
-            asset={toAsset}
+            asset={toggle ? asset : toAsset}
             setShowTokenModal={setShowTokenModal}
             value={toggle ? inputAmount : outputAmount}
             setValue={setOutputAmount}
@@ -155,6 +155,7 @@ const SwapModal = ({
           <TransactionButton
             isSufficentBalance={isSufficentBalance}
             transactionType={"Swap"}
+            toggleWalletModal={toggleWalletModal}
           />
         </div>
       </BridgeModalContainer>
