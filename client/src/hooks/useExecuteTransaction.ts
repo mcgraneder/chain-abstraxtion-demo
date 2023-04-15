@@ -204,7 +204,7 @@ const useExecuteTransaction = (
 
       console.log(result)
       togglePending();
-      setTransactions([
+      const txn = [
         ...transactions,
         {
           account: account,
@@ -215,7 +215,9 @@ const useExecuteTransaction = (
           date: Date.now(),
           ...result,
         },
-      ]);
+      ];
+      setTransactions(txn);
+      localStorage.setItem("transactions", JSON.stringify(txn));
       await memoizedFetchBalances();
     },
     [inputAmount, togglePending, library, account]

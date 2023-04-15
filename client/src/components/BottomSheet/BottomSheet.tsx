@@ -24,7 +24,7 @@ function BottomSheetOptions({
     <Transition appear show={open} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 z-[900000000000000000] overflow-hidden"
+        className="fixed inset-0 z-[90000000000000000000] overflow-hidden"
         onClose={_handleOnClose}
       >
         <div className="min-h-screen text-center">

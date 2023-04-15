@@ -76,10 +76,6 @@ function GlobalStateProvider({ children }: GlobalStateProviderProps) {
      }
    }, []);
 
-   React.useEffect(() => {
-     localStorage.setItem("transactions", JSON.stringify(transactions));
-   });
-
   const togglePending = useCallback(() => {
     setPending((p: boolean) => !p)
   }, [setPending])
